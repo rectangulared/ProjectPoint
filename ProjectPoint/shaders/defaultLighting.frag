@@ -75,7 +75,7 @@ void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(camPos - FragPos);
-    vec3 result = vec3(1.0);
+    vec3 result = vec3(0.0);
     if(isDirLight)
     {
         result = calcDirLight(dirLight, norm, viewDir);

@@ -8,8 +8,8 @@
 class PointLight : public Light
 {
 public:
-	PointLight(const glm::vec3& _position, const glm::vec3& _ambient, const glm::vec3& _diffuse, const glm::vec3& _specular, const GLfloat& _constant, const GLfloat& _linear, const GLfloat& _quadratic) :
-		Light(_ambient, _diffuse, _specular), position(_position), constant(_constant), linear(_linear), quadratic(_quadratic) {};
+	PointLight();
+	PointLight(const glm::vec3& _position, const glm::vec3& _ambient, const glm::vec3& _diffuse, const glm::vec3& _specular, const GLfloat& _constant, const GLfloat& _linear, const GLfloat& _quadratic);
 
 	GLfloat getConstant() const;
 	GLfloat getLinear() const;

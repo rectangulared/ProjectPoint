@@ -148,6 +148,7 @@
     <ClCompile Include="render\entities\model\Model.cpp" />
     <ClCompile Include="render\managers\LightManager.cpp" />
     <ClCompile Include="render\ShaderProgram.cpp" />
+    <ClCompile Include="render\UI\LightManagerUI\LightManagerUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\stb_image.hpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="render\entities\model\Model.h" />
     <ClInclude Include="render\managers\LightManager.h" />
     <ClInclude Include="render\ShaderProgram.h" />
+    <ClInclude Include="render\UI\LightManagerUI\LightManagerUI.h" />
     <ClInclude Include="utils\FileReadUtils.hpp" />
   </ItemGroup>
   <ItemGroup>

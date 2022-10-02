@@ -93,6 +93,9 @@
     <ClCompile Include="render\entities\model\mesh\Mesh.cpp">
       <Filter>Source Files\Render\Model\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="render\UI\LightManagerUI\LightManagerUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\FileReadUtils.hpp">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="render\entities\model\Model.h">
       <Filter>Header Files\Render\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="render\UI\LightManagerUI\LightManagerUI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

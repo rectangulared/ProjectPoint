@@ -10,6 +10,16 @@ LightManager::LightManager(const DirectionalLight& _directionalLight, const std:
 	isDirectionalLightActive = true;
 }
 
+void LightManager::addPointLight()
+{
+	pointLights.push_back(PointLight());
+}
+
+void LightManager::addSpotLight()
+{
+	spotLights.push_back(SpotLight());
+}
+
 void LightManager::addPointLight(const PointLight& pointLight)
 {
 	pointLights.push_back(pointLight);
@@ -45,22 +55,21 @@ void LightManager::changeDirectionalLight(const DirectionalLight& directionalLig
 	this->directionalLight = directionalLight;
 }
 
-void LightManager::directionalLightSwitch(const GLboolean isDirectionalLightActive)
+void LightManager::directionalLightSwitch()
 {
-	this->isDirectionalLightActive = isDirectionalLightActive;
+	isDirectionalLightActive = !isDirectionalLightActive;
 }
 
-void LightManager::setupLights(ShaderProgram& shaderProgram)
+void LightManager::drawLights(ShaderProgram& shaderProgram)
 {
 	shaderProgram.use();
-	if (isDirectionalLightActive)
-	{
-		shaderProgram.setBool("isDirLight", isDirectionalLightActive);
-		shaderProgram.setVec3f("dirLight.direction", directionalLight.getDirection());
-		shaderProgram.setVec3f("dirLight.ambient", directionalLight.getAmbient());
-		shaderProgram.setVec3f("dirLight.diffuse", directionalLight.getDiffuse());
-		shaderProgram.setVec3f("dirLight.specular", directionalLight.getSpecular());
-	}
+
+	shaderProgram.setBool("isDirLight", isDirectionalLightActive);
+	shaderProgram.setVec3f("dirLight.direction", directionalLight.getDirection());
+	shaderProgram.setVec3f("dirLight.ambient", directionalLight.getAmbient());
+	shaderProgram.setVec3f("dirLight.diffuse", directionalLight.getDiffuse());
+	shaderProgram.setVec3f("dirLight.specular", directionalLight.getSpecular());
+
 	if (!pointLights.empty())
 	{
 		for (size_t i = 0; i < pointLights.size(); i++)
@@ -104,4 +113,21 @@ GLuint LightManager::getActivePointLights()
 GLuint LightManager::getActiveSpotLights()
 {
 	return static_cast<GLuint>(spotLights.size());
+}
+
+DirectionalLight* LightManager::getDirectionalLight()
+{
+	return &directionalLight;
+}
+
+PointLight* LightManager::getPointLightByIndex(const GLuint& index)
+{
+	if(index < pointLights.size())
+		return &pointLights[index];
+}
+
+SpotLight* LightManager::getSpotLightByIndex(const GLuint& index)
+{
+	if (index < spotLights.size())
+		return &spotLights[index];
 }

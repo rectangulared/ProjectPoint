@@ -10,6 +10,7 @@
 #include "../entities/light/PointLight.h"
 #include "../entities/light/SpotLight.h"
 
+//TODO: Add possibility to inherit position from another object and offsets
 class LightManager
 {
 public:
@@ -18,17 +19,23 @@ public:
 
 	void addPointLight(const PointLight& pointLight);
 	void addSpotLight(const SpotLight& spotLight);
+	void addPointLight();
+	void addSpotLight();
 	void removePointLight(const GLuint& index);
 	void removeSpotLight(const GLuint& index);
 	void changePointLight(const GLuint& index, const PointLight& pointLight);
 	void changeSpotLight(const GLuint& index, const SpotLight& spotLight);
 	void changeDirectionalLight(const DirectionalLight& directionalLight);
-	void directionalLightSwitch(const GLboolean isDirectionalLightActive);
+	void directionalLightSwitch();
 
-	void setupLights(ShaderProgram& shaderProgram);
+	void drawLights(ShaderProgram& shaderProgram);
 
 	GLuint getActivePointLights();
 	GLuint getActiveSpotLights();
+
+	DirectionalLight* getDirectionalLight();
+	PointLight* getPointLightByIndex(const GLuint& index);
+	SpotLight* getSpotLightByIndex(const GLuint& index);
 
 private:
 	GLboolean isDirectionalLightActive;
