@@ -1,5 +1,7 @@
 #include "ShaderProgram.h"
 
+ShaderProgram::ShaderProgram() {};
+
 ShaderProgram::ShaderProgram(const std::string& vertShaderSource, const std::string& fragShaderSource)
 {
 	GLuint vertShaderID{ glCreateShader(GL_VERTEX_SHADER) }; 

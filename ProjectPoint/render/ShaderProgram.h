@@ -9,7 +9,8 @@
 class ShaderProgram
 {
 public:
-
+	
+	ShaderProgram();
 	ShaderProgram(const std::string& vertShaderSource, const std::string& fragShaderSource);
 
 	void use();

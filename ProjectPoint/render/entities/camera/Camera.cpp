@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : 
+Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch) : 
     front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), fov(FOV)
 {
     this->position = position;
@@ -10,7 +10,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
     updateCameraVectors();
 }
 
-Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : 
+Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) : 
     front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), fov(FOV)
 {
     this->position = glm::vec3(posX, posY, posZ);
@@ -25,9 +25,9 @@ glm::mat4 Camera::getViewMatrix()
     return glm::lookAt(position, position + front, up);
 }
 
-void Camera::processKeyboard(CameraMovement direction, float deltaTime)
+void Camera::processKeyboard(CameraMovement direction, GLfloat deltaTime)
 {
-    float velocity = movementSpeed * deltaTime;
+    GLfloat velocity = movementSpeed * deltaTime;
     if (direction == FORWARD)
         position += front * velocity;
     if (direction == BACKWARD)
@@ -38,7 +38,7 @@ void Camera::processKeyboard(CameraMovement direction, float deltaTime)
         position += right * velocity;
 }
 
-void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
+void Camera::processMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch)
 {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
@@ -57,9 +57,9 @@ void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constr
     updateCameraVectors();
 }
 
-void Camera::processMouseScroll(float yoffset)
+void Camera::processMouseScroll(GLfloat yoffset)
 {
-    fov -= (float)yoffset;
+    fov -= (GLfloat)yoffset;
     if (fov < 1.0f)
         fov = 1.0f;
     if (fov > 45.0f)

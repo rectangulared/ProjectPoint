@@ -4,11 +4,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-constexpr static float YAW = -90.0f;
-constexpr static float PITCH = 0.0f;
-constexpr static float SPEED = 2.5f;
-constexpr static float SENSITIVITY = 0.1f;
-constexpr static float FOV = 78.0f;
+constexpr static GLfloat YAW = -90.0f;
+constexpr static GLfloat PITCH = 0.0f;
+constexpr static GLfloat SPEED = 2.5f;
+constexpr static GLfloat SENSITIVITY = 0.1f;
+constexpr static GLfloat FOV = 78.0f;
 
 enum CameraMovement 
 {
@@ -27,22 +27,22 @@ public:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
-	float yaw;
-	float pitch;
+	GLfloat yaw;
+	GLfloat pitch;
 
-	float movementSpeed;
-	float mouseSensitivity;
-	float fov;
+	GLfloat movementSpeed;
+	GLfloat mouseSensitivity;
+	GLfloat fov;
 
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float _yaw = YAW, float _pitch = PITCH);
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat _yaw = YAW, GLfloat _pitch = PITCH);
 
-	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float _yaw, float _pitch);
+	Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat _yaw, GLfloat _pitch);
 
     glm::mat4 getViewMatrix();
 
-    void processKeyboard(CameraMovement direction, float deltaTime);
-    void processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
-    void processMouseScroll(float yoffset);
+    void processKeyboard(CameraMovement direction, GLfloat deltaTime);
+    void processMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true);
+    void processMouseScroll(GLfloat yoffset);
 
 private:
     void updateCameraVectors();

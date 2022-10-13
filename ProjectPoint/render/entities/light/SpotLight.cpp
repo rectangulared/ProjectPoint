@@ -5,32 +5,21 @@ SpotLight::SpotLight() : PointLight(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.05f
 SpotLight::SpotLight(const glm::vec3& _position, const glm::vec3& _direction, const glm::vec3& _ambient, const glm::vec3& _diffuse, const glm::vec3& _specular, const GLfloat& _constant, const GLfloat& _linear, const GLfloat& _quadratic, const GLfloat& _cutOff, const GLfloat& _outerCutOff) :
 	PointLight(_position, _ambient, _diffuse, _specular, _constant, _linear, _quadratic), cutOff(glm::cos(glm::radians(_cutOff))), outerCutOff(glm::cos(glm::radians(_outerCutOff))), direction(_direction) {};
 
-GLfloat SpotLight::getCutOff() const
+void SpotLight::setCutOffInDegrees(const GLfloat& degrees)
 {
-	return cutOff;
+	cutOff = glm::cos(glm::radians(degrees));
 }
 
-GLfloat SpotLight::getOuterCutOff() const
+void SpotLight::setOuterCutOffInDegrees(const GLfloat& degrees)
 {
-	return outerCutOff;
+	outerCutOff = glm::cos(glm::radians(degrees));
 }
 
-glm::vec3 SpotLight::getDirection() const
+GLfloat SpotLight::getCutOffInDegrees()
 {
-	return direction;
+	return glm::degrees(glm::acos(cutOff));
 }
-
-void SpotLight::setCutOff(const GLfloat& cutOff)
+GLfloat SpotLight::getOuterCutOffInDegrees()
 {
-	this->cutOff = cutOff;
-}
-
-void SpotLight::setOuterCutOff(const GLfloat& outerCutOff)
-{
-	this->outerCutOff = outerCutOff;
-}
-
-void SpotLight::setDirection(const glm::vec3& direction)
-{
-	this->direction = direction;
+	return glm::degrees(glm::acos(outerCutOff));
 }

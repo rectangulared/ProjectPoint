@@ -70,6 +70,22 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -83,6 +99,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,6 +119,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,6 +135,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,6 +155,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -144,22 +164,28 @@
     <ClCompile Include="render\entities\light\DirectionalLight.cpp" />
     <ClCompile Include="render\entities\light\PointLight.cpp" />
     <ClCompile Include="render\entities\light\SpotLight.cpp" />
-    <ClCompile Include="render\entities\model\mesh\Mesh.cpp" />
-    <ClCompile Include="render\entities\model\Model.cpp" />
+    <ClCompile Include="render\entities\object\model\mesh\Mesh.cpp" />
+    <ClCompile Include="render\entities\object\model\Model.cpp" />
+    <ClCompile Include="render\entities\object\Object.cpp" />
     <ClCompile Include="render\managers\LightManager.cpp" />
+    <ClCompile Include="render\managers\ObjectManager.cpp" />
+    <ClCompile Include="render\managers\WorldManager.cpp" />
     <ClCompile Include="render\ShaderProgram.cpp" />
     <ClCompile Include="render\UI\LightManagerUI\LightManagerUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\stb_image.hpp" />
+    <ClInclude Include="render\entities\object\Object.h" />
     <ClInclude Include="render\entities\camera\Camera.h" />
     <ClInclude Include="render\entities\light\DirectionalLight.h" />
     <ClInclude Include="render\entities\light\Light.h" />
     <ClInclude Include="render\entities\light\PointLight.h" />
     <ClInclude Include="render\entities\light\SpotLight.h" />
-    <ClInclude Include="render\entities\model\mesh\Mesh.h" />
-    <ClInclude Include="render\entities\model\Model.h" />
+    <ClInclude Include="render\entities\object\model\mesh\Mesh.h" />
+    <ClInclude Include="render\entities\object\model\Model.h" />
     <ClInclude Include="render\managers\LightManager.h" />
+    <ClInclude Include="render\managers\ObjectManager.h" />
+    <ClInclude Include="render\managers\WorldManager.h" />
     <ClInclude Include="render\ShaderProgram.h" />
     <ClInclude Include="render\UI\LightManagerUI\LightManagerUI.h" />
     <ClInclude Include="utils\FileReadUtils.hpp" />
@@ -169,6 +195,8 @@
     <None Include="shaders\defaultLighting.vert" />
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
+    <None Include="shaders\LightingOpacity.frag" />
+    <None Include="shaders\LightingOpacity.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

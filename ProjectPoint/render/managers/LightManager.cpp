@@ -10,16 +10,6 @@ LightManager::LightManager(const DirectionalLight& _directionalLight, const std:
 	isDirectionalLightActive = true;
 }
 
-void LightManager::addPointLight()
-{
-	pointLights.push_back(PointLight());
-}
-
-void LightManager::addSpotLight()
-{
-	spotLights.push_back(SpotLight());
-}
-
 void LightManager::addPointLight(const PointLight& pointLight)
 {
 	pointLights.push_back(pointLight);
@@ -40,47 +30,27 @@ void LightManager::removeSpotLight(const GLuint& index)
 	spotLights.erase(spotLights.begin() + index);
 }
 
-void LightManager::changePointLight(const GLuint& index, const PointLight& pointLight)
-{
-	pointLights[index] = pointLight;
-}
-
-void LightManager::changeSpotLight(const GLuint& index, const SpotLight& spotLight)
-{
-	spotLights[index] = spotLight;
-}
-
-void LightManager::changeDirectionalLight(const DirectionalLight& directionalLight)
-{
-	this->directionalLight = directionalLight;
-}
-
-void LightManager::directionalLightSwitch()
-{
-	isDirectionalLightActive = !isDirectionalLightActive;
-}
-
 void LightManager::drawLights(ShaderProgram& shaderProgram)
 {
 	shaderProgram.use();
 
 	shaderProgram.setBool("isDirLight", isDirectionalLightActive);
-	shaderProgram.setVec3f("dirLight.direction", directionalLight.getDirection());
-	shaderProgram.setVec3f("dirLight.ambient", directionalLight.getAmbient());
-	shaderProgram.setVec3f("dirLight.diffuse", directionalLight.getDiffuse());
-	shaderProgram.setVec3f("dirLight.specular", directionalLight.getSpecular());
+	shaderProgram.setVec3f("dirLight.direction", directionalLight.direction);
+	shaderProgram.setVec3f("dirLight.ambient", directionalLight.ambient);
+	shaderProgram.setVec3f("dirLight.diffuse", directionalLight.diffuse);
+	shaderProgram.setVec3f("dirLight.specular", directionalLight.specular);
 
 	if (!pointLights.empty())
 	{
 		for (size_t i = 0; i < pointLights.size(); i++)
 		{
-			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].position", pointLights[i].getPosition());
-			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].ambient", pointLights[i].getAmbient());
-			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i].getDiffuse());
-			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].specular", pointLights[i].getSpecular());
-			shaderProgram.setFloat("pointLights[" + std::to_string(i) + "].constant", pointLights[i].getConstant());
-			shaderProgram.setFloat("pointLights[" + std::to_string(i) + "].linear", pointLights[i].getLinear());
-			shaderProgram.setFloat("pointLights[" + std::to_string(i) + "].quadratic", pointLights[i].getQuadratic());
+			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].position", pointLights[i].position);
+			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].ambient", pointLights[i].ambient);
+			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i].diffuse);
+			shaderProgram.setVec3f("pointLights[" + std::to_string(i) + "].specular", pointLights[i].specular);
+			shaderProgram.setFloat("pointLights[" + std::to_string(i) + "].constant", pointLights[i].constant);
+			shaderProgram.setFloat("pointLights[" + std::to_string(i) + "].linear", pointLights[i].linear);
+			shaderProgram.setFloat("pointLights[" + std::to_string(i) + "].quadratic", pointLights[i].quadratic);
 		}
 	}
 	shaderProgram.setUInt("activePointLights", pointLights.size());
@@ -89,45 +59,18 @@ void LightManager::drawLights(ShaderProgram& shaderProgram)
 	{
 		for (size_t i = 0; i < spotLights.size(); i++)
 		{
-			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].position", spotLights[i].getPosition());
-			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].direction", spotLights[i].getDirection());
-			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].ambient", spotLights[i].getAmbient());
-			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].diffuse", spotLights[i].getDiffuse());
-			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].specular", spotLights[i].getSpecular());
-			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].constant", spotLights[i].getConstant());
-			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].linear", spotLights[i].getLinear());
-			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].quadratic", spotLights[i].getQuadratic());
-			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].cutOff", spotLights[i].getCutOff());
-			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].outerCutOff", spotLights[i].getOuterCutOff());
+			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].position", spotLights[i].position);
+			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].direction", spotLights[i].direction);
+			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].ambient", spotLights[i].ambient);
+			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].diffuse", spotLights[i].diffuse);
+			shaderProgram.setVec3f("spotLights[" + std::to_string(i) + "].specular", spotLights[i].specular);
+			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].constant", spotLights[i].constant);
+			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].linear", spotLights[i].linear);
+			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].quadratic", spotLights[i].quadratic);
+			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].cutOff", spotLights[i].cutOff);
+			shaderProgram.setFloat("spotLights[" + std::to_string(i) + "].outerCutOff", spotLights[i].outerCutOff);
 		}
 	}
 	shaderProgram.setUInt("activeSpotLights", spotLights.size());
 
-}
-
-GLuint LightManager::getActivePointLights()
-{
-	return static_cast<GLuint>(pointLights.size());
-}
-
-GLuint LightManager::getActiveSpotLights()
-{
-	return static_cast<GLuint>(spotLights.size());
-}
-
-DirectionalLight* LightManager::getDirectionalLight()
-{
-	return &directionalLight;
-}
-
-PointLight* LightManager::getPointLightByIndex(const GLuint& index)
-{
-	if(index < pointLights.size())
-		return &pointLights[index];
-}
-
-SpotLight* LightManager::getSpotLightByIndex(const GLuint& index)
-{
-	if (index < spotLights.size())
-		return &spotLights[index];
 }

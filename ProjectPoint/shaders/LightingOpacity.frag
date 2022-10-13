@@ -51,6 +51,7 @@ struct Material
     float specularStrength;
     sampler2D texture_diffuse1;
     sampler2D texture_specular1;  
+    sampler2D texture_opacity1;
 };
 
 
@@ -91,10 +92,7 @@ void main()
         result += calcSpotLight(spotLights[i], norm, FragPos, viewDir);
     }
 
-    if(result.a < 0.1)
-        discard;
-
-    FragColor = result;
+    FragColor = vec4(result.xyz, texture(material.texture_opacity1, TexCoord));
 }
 
 vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)

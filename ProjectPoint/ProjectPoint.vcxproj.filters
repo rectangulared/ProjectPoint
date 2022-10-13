@@ -87,13 +87,22 @@
     <ClCompile Include="render\entities\camera\Camera.cpp">
       <Filter>Source Files\Render\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="render\entities\model\Model.cpp">
+    <ClCompile Include="render\entities\object\model\Model.cpp">
       <Filter>Source Files\Render\Model</Filter>
     </ClCompile>
-    <ClCompile Include="render\entities\model\mesh\Mesh.cpp">
+    <ClCompile Include="render\entities\object\model\mesh\Mesh.cpp">
       <Filter>Source Files\Render\Model\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="render\UI\LightManagerUI\LightManagerUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\entities\object\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\managers\ObjectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\managers\WorldManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,7 +128,7 @@
     <ClInclude Include="render\entities\light\SpotLight.h">
       <Filter>Header Files\Render\Light</Filter>
     </ClInclude>
-    <ClInclude Include="render\entities\model\mesh\Mesh.h">
+    <ClInclude Include="render\entities\object\model\mesh\Mesh.h">
       <Filter>Header Files\Render\Model\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="render\entities\camera\Camera.h">
@@ -128,10 +137,19 @@
     <ClInclude Include="render\managers\LightManager.h">
       <Filter>Header Files\Render\Managers</Filter>
     </ClInclude>
-    <ClInclude Include="render\entities\model\Model.h">
+    <ClInclude Include="render\entities\object\model\Model.h">
       <Filter>Header Files\Render\Model</Filter>
     </ClInclude>
     <ClInclude Include="render\UI\LightManagerUI\LightManagerUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\managers\ObjectManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\entities\object\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\managers\WorldManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -148,5 +166,7 @@
     <None Include="shaders\default.frag">
       <Filter>Resource Files\Fragment Shaders</Filter>
     </None>
+    <None Include="shaders\LightingOpacity.frag" />
+    <None Include="shaders\LightingOpacity.vert" />
   </ItemGroup>
 </Project>
