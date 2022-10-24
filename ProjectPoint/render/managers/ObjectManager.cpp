@@ -16,14 +16,6 @@ void ObjectManager::addObject(Object* object)
 	objects.push_back(object);
 }
 
-void ObjectManager::update()
-{
-	for (size_t i = 0; i < objects.size(); i++)
-	{
-		objects[i]->update();
-	}
-}
-
 void ObjectManager::draw(const glm::vec3& cameraPosition, ShaderProgram& opaqueShaderProgram, ShaderProgram& transparentShaderProgram)
 {
 	std::map<float, Object*> sorted;

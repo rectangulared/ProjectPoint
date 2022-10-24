@@ -3,6 +3,7 @@
 static int selectedPointLightIndex;
 static int selectedSpotLightIndex;
 
+LightManagerUI::LightManagerUI() {};
 
 void LightManagerUI::setup(LightManager* lightManager)
 {
@@ -23,7 +24,7 @@ void LightManagerUI::draw()
 	ImGui::SliderFloat3("Directional Light Specular", glm::value_ptr(ptr_LightManager->directionalLight.specular), 0.0f, 1.0f, "%.3f", 0);
 
 	if (ImGui::Button("Directional Light Switch"))
-		ptr_LightManager->isDirectionalLightActive = !ptr_LightManager->isDirectionalLightActive;
+		ptr_LightManager->isDirectionalLightActive = ~ptr_LightManager->isDirectionalLightActive;
 
 	if(ptr_LightManager->pointLights.size() != 0)
 	{

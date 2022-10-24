@@ -15,6 +15,5 @@ public:
 
 	void addObject(Object* object);
 	void removeObject(unsigned int index);
-	void update();
 	void draw(const glm::vec3& cameraPosition, ShaderProgram& opaqueShaderProgram, ShaderProgram& transparentShaderProgram);
 };

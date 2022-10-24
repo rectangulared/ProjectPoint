@@ -6,8 +6,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "bullet/btBulletDynamicsCommon.h"
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -28,7 +26,7 @@ public:
 
 	static WorldManager* getInstance();
 
-	int init();
+	void init();
 	void update();
 	void clear();
 
@@ -63,12 +61,6 @@ private:
 	LightManager lightManager;
 	LightManagerUI lightManagerUi;
 	ObjectManager objectManager;
-
-	btDynamicsWorld* world;
-	btDispatcher* dispatcher;
-	btCollisionConfiguration* collisionConfig;
-	btBroadphaseInterface* broadphase;
-	btConstraintSolver* solver;
 
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
@@ -123,16 +115,5 @@ private:
 		glViewport(0, 0, width, height);
 	}
 
-	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-		{
-			worldManager_->isItemSpawned = !worldManager_->isItemSpawned;
-			if (worldManager_->isItemSpawned)
-			{
-				worldManager_->objectManager.addObject(new Object(worldManager_->cubeModel, Object::CUBE));
-				worldManager_->world->addRigidBody(worldManager_->objectManager.objects[worldManager_->objectManager.objects.size() - 1]->getRigidBodyPrt());
-			}
-		}
-	}
+	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {}
 };

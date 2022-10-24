@@ -19,6 +19,7 @@ std::string readTextFromFile(const std::string& filePath)
 	catch (std::ifstream::failure& e)
 	{
 		//TODO Add exception managment logic
+		std::cout << e.what() << std::endl;
 		return nullptr;
 	}
 }

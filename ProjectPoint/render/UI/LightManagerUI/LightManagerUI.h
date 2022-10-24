@@ -5,12 +5,14 @@
 #include "imgui_impl_opengl3.h"
 #include "../../managers/LightManager.h"
 
+//TODO: remake this class as singleton
 class LightManagerUI
 {
 public:
+	LightManagerUI();
 	void setup(LightManager* lightManager);
 	void draw();
-	void switchVisibility();
+	//void switchVisibility();
 private:
 	LightManager* ptr_LightManager;
 	bool isVisible;
