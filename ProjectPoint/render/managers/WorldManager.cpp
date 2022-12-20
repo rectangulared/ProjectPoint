@@ -1,6 +1,7 @@
 #include "WorldManager.h"
 
 #include "../../utils/FileReadUtils.hpp"
+#include "../entities/framebuffer/Framebuffer.h"
 
 WorldManager* WorldManager::worldManager_ = nullptr;
 
@@ -40,7 +41,7 @@ void WorldManager::init()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -69,12 +70,45 @@ void WorldManager::init()
 	lightManager = LightManager();
 	lightManager.addPointLight(PointLight());
 	lightManagerUi.setup(&lightManager);
-	camera = Camera(glm::vec3(0.0f, 2.0f, 20.0f));
+	camera = Camera(glm::vec3(0.0f, 2.0f, 10.0f));
 	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
 }
 
 void WorldManager::update()
 {
+	float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	ShaderProgram fboShader = ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/default.frag"));
+
+	Framebuffer fbo = Framebuffer();
+	GLuint texture;
+	float renderScale = 1.0f;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		//TODO: Make separate render manager
@@ -83,6 +117,11 @@ void WorldManager::update()
 		lastFrame = currentFrame;
 
 		processInput();
+		
+		fbo.bind();
+		glViewport(0, 0, 1600 * renderScale, 900 * renderScale);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1600 * renderScale, 900 * renderScale, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -105,6 +144,16 @@ void WorldManager::update()
 		lightManager.drawLights(mainShader);
 		objectManager.draw(camera.position, mainShader, opacityShader);
 
+		fbo.unbind();
+
+		glViewport(0, 0, 1600, 900);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		fboShader.use();
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
 		//TODO: Make UI manager
 		if (isMenuOpen)
 		{
@@ -112,6 +161,8 @@ void WorldManager::update()
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			lightManagerUi.draw();
+			ImGui::Image((void*)texture, ImVec2(320, 240));
+			ImGui::SliderFloat("Render Scale", &renderScale, 0.1f, 4.0f, "%.1f", 0);
 			ImGui::Render();
 			int display_w, display_h;
 			glfwGetFramebufferSize(window, &display_w, &display_h);
