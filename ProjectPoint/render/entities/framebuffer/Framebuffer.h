@@ -4,13 +4,15 @@
 
 class Framebuffer
 {
-	GLuint id;
+	GLuint _id;
+	GLuint _framebufferWidth;
+	GLuint _framebufferHeight;
 
 public:
 
 	void bind()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, id);
+		glBindFramebuffer(GL_FRAMEBUFFER, _id);
 	}
 
 	void unbind()
@@ -24,7 +26,7 @@ public:
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 240, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _framebufferWidth, _framebufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -33,14 +35,19 @@ public:
 		return texture;
 	}
 
-	Framebuffer()
+	Framebuffer() : _framebufferWidth(1920), _framebufferHeight(1080)
 	{
-		glGenFramebuffers(1, &id);
+		glGenFramebuffers(1, &_id);
+	}
+
+	Framebuffer(GLuint framebufferWidth, GLuint framebufferHeight) : _framebufferWidth(framebufferWidth), _framebufferHeight(framebufferHeight)
+	{
+		glGenFramebuffers(1, &_id);
 	}
 
 	~Framebuffer()
 	{
-		glDeleteFramebuffers(1, &id);
+		glDeleteFramebuffers(1, &_id);
 	}
 
 };

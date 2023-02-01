@@ -30,6 +30,7 @@ void ShaderProgram::use()
 {
 	glUseProgram(programID);
 }
+
 void ShaderProgram::deleteProgram()
 {
 	glDeleteProgram(programID);

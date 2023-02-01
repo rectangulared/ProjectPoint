@@ -168,5 +168,8 @@
     </None>
     <None Include="shaders\LightingOpacity.frag" />
     <None Include="shaders\LightingOpacity.vert" />
+    <None Include="shaders\postEffect.frag" />
+    <None Include="shaders\skybox.vert" />
+    <None Include="shaders\skybox.frag" />
   </ItemGroup>
 </Project>
