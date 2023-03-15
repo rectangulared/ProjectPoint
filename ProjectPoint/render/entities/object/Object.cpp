@@ -6,7 +6,7 @@ Object::Object() : modelMatrix(glm::mat4{ 1.0f })
 	glm::decompose(modelMatrix, scale, orientation, translation, skew, perspective);
 }
 
-Object::Object(const Model& _model, const glm::mat4 _modelMatrix) : model(_model), modelMatrix(_modelMatrix)
+Object::Object(const Model& _model, const glm::mat4& _modelMatrix, bool instancing) : model(_model), modelMatrix(_modelMatrix), _instancing(instancing)
 {
 	glm::decompose(modelMatrix, scale, orientation, translation, skew, perspective);
 };

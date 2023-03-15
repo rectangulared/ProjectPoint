@@ -65,8 +65,8 @@ uniform Material material;
 
 uniform bool isDirLight;
 
-uniform unsigned int activePointLights;
-uniform unsigned int activeSpotLights;
+uniform uint activePointLights;
+uniform uint activeSpotLights;
 
 vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec4 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);  

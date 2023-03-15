@@ -9,7 +9,7 @@ class Object
 {
 public:
 	Object();
-	Object(const Model& _model, const glm::mat4 _modelMatrix = glm::mat4(1.0f));
+	Object(const Model& _model, const glm::mat4& _modelMatrix = glm::mat4(1.0f), bool instancing = false);
 
 	void rotate(GLfloat degrees, glm::vec3 axis);
 	void Scale(glm::vec3 axis);
@@ -28,6 +28,7 @@ public:
 
 	bool isModelOpaque();
 
+	bool _instancing;
 private:
 	glm::vec3 scale;
 	glm::quat orientation;
@@ -35,5 +36,6 @@ private:
 	glm::vec3 skew;
 	glm::vec4 perspective;
 	glm::mat4 modelMatrix;
+
 	Model model;
 };

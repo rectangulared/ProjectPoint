@@ -16,14 +16,18 @@ void ObjectManager::addObject(Object* object)
 	objects.push_back(object);
 }
 
-void ObjectManager::draw(const glm::vec3& cameraPosition, ShaderProgram& opaqueShaderProgram, ShaderProgram& transparentShaderProgram)
+void ObjectManager::draw(const glm::vec3& cameraPosition, ShaderProgram& opaqueShaderProgram, ShaderProgram& transparentShaderProgram, ShaderProgram& instancingShaderProgram)
 {
 	std::map<float, Object*> sorted;
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->isModelOpaque())
+		if (objects[i]->isModelOpaque() && !objects[i]->_instancing)
 		{
 			objects[i]->draw(opaqueShaderProgram);
+		}
+		else if (objects[i]->_instancing)
+		{
+			objects[i]->draw(instancingShaderProgram);
 		}
 		else
 		{

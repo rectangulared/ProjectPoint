@@ -1,60 +1,8 @@
 #include "Model.h"
 
-#include "../../../../3rd/stb_image.hpp"
-GLuint Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
-{
-    std::string filename = std::string(path);
-    filename = directory + '/' + filename;
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format{ 0 };
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
-}
-
 Model::Model() {}
 
-Model::Model(std::string const& path, bool _opaque, bool gamma) : gammaCorrection(gamma), opaque(_opaque)
-{
-    loadModel(path);
-}
-
-void Model::draw(ShaderProgram& shaderProgram)
-{
-    for (size_t i = 0; i < meshes.size(); i++)
-        meshes[i].draw(shaderProgram);
-}
-
-void Model::loadModel(std::string const& path)
+Model::Model(std::string const& path, bool _opaque, bool _gamma) : gammaCorrection(_gamma), opaque(_opaque)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices);
@@ -63,10 +11,33 @@ void Model::loadModel(std::string const& path)
         //TODO: Add model import error checking logic
         return;
     }
-    
+
     directory = path.substr(0, path.find_last_of('/'));
 
     processNode(scene->mRootNode, scene);
+}
+
+Model::Model(std::string const& path, const std::vector<glm::mat4>& instanceMatrix, const int instancing, bool _opaque, bool _gamma)
+{
+    this->_instancing = instancing < 1 ? 1 : instancing;
+    this->_instanceMatrix = instanceMatrix;
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices);
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        //TODO: Add model import error checking logic
+        return;
+    }
+
+    directory = path.substr(0, path.find_last_of('/'));
+
+    processNode(scene->mRootNode, scene);
+}
+
+void Model::draw(ShaderProgram& shaderProgram)
+{
+    for (size_t i = 0; i < meshes.size(); i++)
+        meshes[i].draw(shaderProgram);
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -113,10 +84,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
             glm::vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.texCoords = vec;
+            vertex.textureUV = vec;
         }
         else
-            vertex.texCoords = glm::vec2(0.0f);
+            vertex.textureUV = glm::vec2(0.0f);
 
         vertices.push_back(vertex);
     }
@@ -141,41 +112,38 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         std::vector<Texture> opacityMaps = loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity");
         textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
     }
-
-    return Mesh(vertices, indices, textures);
+        return Mesh(vertices, indices, textures, _instanceMatrix, _instancing);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
     std::vector<Texture> textures;
-    for (size_t i = 0; i < mat->GetTextureCount(type); i++)
+    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
         aiString str;
+        Texture* texture;
         mat->GetTexture(type, i, &str);
-
-        bool alreadyLoaded = false;
+        bool skip = false;
         for (size_t j = 0; j < loadedTextures.size(); j++)
         {
             if (std::strcmp(loadedTextures[j].path.data(), str.C_Str()) == 0)
             {
                 textures.push_back(loadedTextures[j]);
-                alreadyLoaded = true;
+                skip = true;
                 break;
             }
         }
-        if (!alreadyLoaded)
-        {   
-            Texture texture;
-            texture.id = TextureFromFile(str.C_Str(), this->directory);
-            texture.type = typeName;
-            texture.path = str.C_Str();
-            textures.push_back(texture);
-            loadedTextures.push_back(texture);
+        if (!skip)
+        {
+            std::string fullPath = directory + "/" + str.C_Str();
+            texture = new Texture(fullPath.c_str(), typeName.c_str());
+            texture->path = str.C_Str();
+            textures.push_back(*texture);
+            loadedTextures.push_back(*texture);
         }
     }
     return textures;
 }
-
 bool Model::isOpaque()
 {
     return opaque;

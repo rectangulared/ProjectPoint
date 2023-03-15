@@ -9,12 +9,12 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "../../render/UI/LightManagerUI/LightManagerUI.h"
-#include "../../render/entities/camera/Camera.h"
-#include "../../render/entities/object/model/Model.h"
-#include "../../render/managers/LightManager.h"
-#include "../../render/managers/ObjectManager.h"
-#include "../../render/entities/object/Object.h"
+#include "render/UI/LightManagerUI/LightManagerUI.h"
+#include "render/entities/camera/Camera.h"
+#include "render/entities/object/model/Model.h"
+#include "render/managers/LightManager.h"
+#include "render/managers/ObjectManager.h"
+#include "render/entities/object/Object.h"
 
 class WorldManager
 {

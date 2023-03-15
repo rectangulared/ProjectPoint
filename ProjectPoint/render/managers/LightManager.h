@@ -5,10 +5,10 @@
 
 #include "glad/glad.h"
 
-#include "../ShaderProgram.h"
-#include "../entities/light/DirectionalLight.h"
-#include "../entities/light/PointLight.h"
-#include "../entities/light/SpotLight.h"
+#include "render/ShaderProgram.h"
+#include "render/entities/light/DirectionalLight.h"
+#include "render/entities/light/PointLight.h"
+#include "render/entities/light/SpotLight.h"
 
 //TODO: Add possibility to inherit position from another object and offsets
 //TODO: Add light icons sprites at every light position
@@ -28,5 +28,5 @@ public:
 	void removePointLight(const GLuint& index);
 	void removeSpotLight(const GLuint& index);
 
-	void drawLights(ShaderProgram& shaderProgram);
+	void drawLights(ShaderProgram& shaderProgram, const GLuint& uboRangeIndex);
 };

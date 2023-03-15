@@ -105,6 +105,18 @@
     <ClCompile Include="render\managers\WorldManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\entities\buffers\VBO\VBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\entities\buffers\VAO\VAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\entities\buffers\EBO\EBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\entities\object\model\texture\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\FileReadUtils.hpp">
@@ -112,9 +124,6 @@
     </ClInclude>
     <ClInclude Include="render\ShaderProgram.h">
       <Filter>Header Files\Render\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="3rd\stb_image.hpp">
-      <Filter>Header-only Files</Filter>
     </ClInclude>
     <ClInclude Include="render\entities\light\DirectionalLight.h">
       <Filter>Header Files\Render\Light</Filter>
@@ -152,6 +161,18 @@
     <ClInclude Include="render\managers\WorldManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="render\entities\buffers\VBO\VBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\entities\buffers\VAO\VAO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\entities\buffers\EBO\EBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\entities\object\model\texture\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\defaultLighting.vert">
@@ -171,5 +192,6 @@
     <None Include="shaders\postEffect.frag" />
     <None Include="shaders\skybox.vert" />
     <None Include="shaders\skybox.frag" />
+    <None Include="shaders\instancing.vert" />
   </ItemGroup>
 </Project>

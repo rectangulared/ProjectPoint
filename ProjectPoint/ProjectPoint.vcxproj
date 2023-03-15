@@ -95,6 +95,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -113,6 +114,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,6 +133,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,6 +152,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,12 +164,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="render\entities\buffers\EBO\EBO.cpp" />
+    <ClCompile Include="render\entities\buffers\VAO\VAO.cpp" />
+    <ClCompile Include="render\entities\buffers\VBO\VBO.cpp" />
     <ClCompile Include="render\entities\camera\Camera.cpp" />
     <ClCompile Include="render\entities\light\DirectionalLight.cpp" />
     <ClCompile Include="render\entities\light\PointLight.cpp" />
     <ClCompile Include="render\entities\light\SpotLight.cpp" />
     <ClCompile Include="render\entities\object\model\mesh\Mesh.cpp" />
     <ClCompile Include="render\entities\object\model\Model.cpp" />
+    <ClCompile Include="render\entities\object\model\texture\Texture.cpp" />
     <ClCompile Include="render\entities\object\Object.cpp" />
     <ClCompile Include="render\managers\LightManager.cpp" />
     <ClCompile Include="render\managers\ObjectManager.cpp" />
@@ -174,7 +182,10 @@
     <ClCompile Include="render\UI\LightManagerUI\LightManagerUI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="3rd\stb_image.hpp" />
+    <ClInclude Include="render\entities\buffers\EBO\EBO.h" />
+    <ClInclude Include="render\entities\buffers\VAO\VAO.h" />
+    <ClInclude Include="render\entities\buffers\VBO\VBO.h" />
+    <ClInclude Include="render\entities\object\model\texture\Texture.h" />
     <ClInclude Include="render\entities\object\Object.h" />
     <ClInclude Include="render\entities\camera\Camera.h" />
     <ClInclude Include="render\entities\light\DirectionalLight.h" />
@@ -195,6 +206,7 @@
     <None Include="shaders\defaultLighting.vert" />
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
+    <None Include="shaders\instancing.vert" />
     <None Include="shaders\LightingOpacity.frag" />
     <None Include="shaders\LightingOpacity.vert" />
     <None Include="shaders\postEffect.frag" />

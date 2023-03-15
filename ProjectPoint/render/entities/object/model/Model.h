@@ -9,7 +9,7 @@
 #include <assimp/postprocess.h>
 
 #include "mesh/Mesh.h"
-#include "../../../ShaderProgram.h"
+#include "render/ShaderProgram.h"
 
 #include <fstream>
 #include <map>
@@ -23,7 +23,8 @@ class Model
 public:
 
     Model();
-    Model(std::string const& path, bool _opaque = true, bool gamma = false);
+    Model(std::string const& path, bool _opaque = true, bool _gamma = false);
+    Model(std::string const& path, const std::vector<glm::mat4>& instanceMatrix, const int instancing, bool _opaque = true, bool gamma = false);
 
     void draw(ShaderProgram& shaderProgram);
 
@@ -36,9 +37,10 @@ private:
     std::vector<Texture> loadedTextures;
     std::vector<Mesh> meshes;
 
-    void loadModel(std::string const& path);
+    unsigned int _instancing = 0;
+    std::vector<glm::mat4> _instanceMatrix;
+
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
-    GLuint TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
 };

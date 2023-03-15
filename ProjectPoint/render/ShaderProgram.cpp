@@ -8,19 +8,68 @@ ShaderProgram::ShaderProgram(const std::string& vertShaderSource, const std::str
 	const GLchar* tempVertSource{ vertShaderSource.c_str() };
 	glShaderSource(vertShaderID, 1, &tempVertSource, NULL);
 	glCompileShader(vertShaderID);
-	//TODO: Add shader compile error check
+	GLint isCompiled = 0;
+	glGetShaderiv(vertShaderID, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(vertShaderID, GL_INFO_LOG_LENGTH, &maxLength);
+
+		char errorLog[256];
+		glGetShaderInfoLog(vertShaderID, maxLength, &maxLength, &errorLog[0]);
+
+		std::cout << errorLog << std::endl;
+
+		glDeleteShader(vertShaderID);
+		return;
+	}
 
 	GLuint fragShaderID{ glCreateShader(GL_FRAGMENT_SHADER) };
 	const GLchar* tempFragSource{ fragShaderSource.c_str() };
 	glShaderSource(fragShaderID, 1, &tempFragSource, NULL);
 	glCompileShader(fragShaderID);
-	//TODO: Add shader compile error check
+	isCompiled = 0;
+	glGetShaderiv(fragShaderID, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(fragShaderID, GL_INFO_LOG_LENGTH, &maxLength);
+
+		char errorLog[256];
+		glGetShaderInfoLog(fragShaderID, maxLength, &maxLength, &errorLog[0]);
+
+		std::cout << errorLog << std::endl;
+
+		glDeleteShader(fragShaderID);
+		return;
+	}
 
 	programID = glCreateProgram();
 	glAttachShader(programID, vertShaderID);
 	glAttachShader(programID, fragShaderID);
 	glLinkProgram(programID);
-	//TODO: Add shader program linking error
+	GLint isLinked = 0;
+	glGetProgramiv(programID, GL_LINK_STATUS, (int*)&isLinked);
+	if (isLinked == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &maxLength);
+
+		// The maxLength includes the NULL character
+		char errorLog[256];
+		glGetProgramInfoLog(programID, maxLength, &maxLength, &errorLog[0]);
+
+		// We don't need the program anymore.
+		glDeleteProgram(programID);
+		// Don't leak shaders either.
+		glDeleteShader(vertShaderID);
+		glDeleteShader(fragShaderID);
+
+		// Use the infoLog as you see fit.
+
+		// In this simple program, we'll just leave
+		return;
+	}
 
 	glDeleteShader(vertShaderID);
 	glDeleteShader(fragShaderID);
