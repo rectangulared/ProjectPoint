@@ -2,79 +2,11 @@
 
 #include "utils/FileReadUtils.hpp"
 #include "render/entities/framebuffer/Framebuffer.h"
+#include <render/entities/object/model/texture/Cubemap.h>
 
 float randf()
 {
 	return -1.0f + (rand() / (RAND_MAX / 2.0f));
-}
-
-unsigned int loadTexture(char const* path)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format = 0;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
-}
-
-unsigned int loadCubemap(std::vector<std::string> faces)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	int width, height, nrChannels;
-	for (unsigned int i = 0; i < faces.size(); i++)
-	{
-		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-			);
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
-			stbi_image_free(data);
-		}
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	return textureID;
 }
 
 WorldManager* WorldManager::worldManager_ = nullptr;
@@ -169,7 +101,7 @@ void WorldManager::init()
 		rot = glm::mat4_cast(tempRotation);
 		sca = glm::scale(sca, tempScale);
 
-		instanceMatrix.push_back(trans * rot * sca);
+		instanceMatrix.push_back(trans);
 	}
 
 	cubeModel = Model("./models/Cube/cube.obj", instanceMatrix, 100000);
@@ -271,19 +203,13 @@ void WorldManager::update()
 		"models/skybox/back.jpg"
 	};
 
-	GLuint cubemapTexture = loadCubemap(faces);
-
+	Cubemap cubemapTexture = Cubemap(faces);
 
 	Framebuffer fbo;
 	fbo.bind();
 
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+	Texture framebufferTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB);
+	framebufferTexture.attachToCurrentFramebuffer(GL_COLOR_ATTACHMENT0);
 
 	GLuint rbo;
 	glGenRenderbuffers(1, &rbo);
@@ -292,19 +218,6 @@ void WorldManager::update()
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 	fbo.unbind();
-
-	Framebuffer fbo1;
-	fbo1.bind();
-
-	GLuint texture1;
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture1, 0);
-
-	fbo1.unbind();
 
 	Model sponza = Model("./models/Sponza/sponza.obj");
 	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
@@ -338,8 +251,8 @@ void WorldManager::update()
 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f, 100.0f);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboProjectionView);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -382,13 +295,11 @@ void WorldManager::update()
 		skyboxShader.setMat4f("projection", projection);
 
 		skyboxVAO.bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		cubemapTexture.bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glDepthFunc(GL_LESS);
-
 		fbo.unbind();
-		//fbo1.bind();
+
 		glDisable(GL_DEPTH_TEST);
 
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -396,28 +307,17 @@ void WorldManager::update()
 
 		screenShader.use();
 		screenVAO.bind();
-		glBindTexture(GL_TEXTURE_2D, texture);
+		framebufferTexture.bind();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		screenVAO.unbind();
-		//fbo1.unbind();
 
-		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		//glClear(GL_COLOR_BUFFER_BIT);
-
-		//test2.use();
-		//screenVAO.bind();
-		//glBindTexture(GL_TEXTURE_2D, texture1);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
-		//screenVAO.unbind();
-
-		//TODO: Make UI manager
 		if (isMenuOpen)
 		{
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			lightManagerUi.draw();
-			ImGui::Image((void*)(intptr_t)texture, ImVec2(320, 240));
+			ImGui::Image((void*)(intptr_t)framebufferTexture._id, ImVec2(320, 240));
 			ImGui::Render();
 			int display_w, display_h;
 			glfwGetFramebufferSize(window, &display_w, &display_h);

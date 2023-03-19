@@ -168,11 +168,13 @@
     <ClCompile Include="render\entities\buffers\VAO\VAO.cpp" />
     <ClCompile Include="render\entities\buffers\VBO\VBO.cpp" />
     <ClCompile Include="render\entities\camera\Camera.cpp" />
+    <ClCompile Include="render\entities\framebuffer\Framebuffer.cpp" />
     <ClCompile Include="render\entities\light\DirectionalLight.cpp" />
     <ClCompile Include="render\entities\light\PointLight.cpp" />
     <ClCompile Include="render\entities\light\SpotLight.cpp" />
     <ClCompile Include="render\entities\object\model\mesh\Mesh.cpp" />
     <ClCompile Include="render\entities\object\model\Model.cpp" />
+    <ClCompile Include="render\entities\object\model\texture\Cubemap.cpp" />
     <ClCompile Include="render\entities\object\model\texture\Texture.cpp" />
     <ClCompile Include="render\entities\object\Object.cpp" />
     <ClCompile Include="render\managers\LightManager.cpp" />
@@ -185,6 +187,7 @@
     <ClInclude Include="render\entities\buffers\EBO\EBO.h" />
     <ClInclude Include="render\entities\buffers\VAO\VAO.h" />
     <ClInclude Include="render\entities\buffers\VBO\VBO.h" />
+    <ClInclude Include="render\entities\object\model\texture\Cubemap.h" />
     <ClInclude Include="render\entities\object\model\texture\Texture.h" />
     <ClInclude Include="render\entities\object\Object.h" />
     <ClInclude Include="render\entities\camera\Camera.h" />
