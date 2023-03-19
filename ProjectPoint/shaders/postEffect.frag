@@ -11,13 +11,13 @@ void main()
 {
     vec2 offsets[9] = vec2[](
         vec2(-offset,  offset), // top-left
-        vec2( 0.0f,    offset), // top-center
+        vec2( 0.0,    offset), // top-center
         vec2( offset,  offset), // top-right
-        vec2(-offset,  0.0f),   // center-left
-        vec2( 0.0f,    0.0f),   // center-center
-        vec2( offset,  0.0f),   // center-right
+        vec2(-offset,  0.0),   // center-left
+        vec2( 0.0,    0.0),   // center-center
+        vec2( offset,  0.0),   // center-right
         vec2(-offset, -offset), // bottom-left
-        vec2( 0.0f,   -offset), // bottom-center
+        vec2( 0.0,   -offset), // bottom-center
         vec2( offset, -offset)  // bottom-right    
     );
 

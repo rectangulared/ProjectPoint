@@ -172,13 +172,13 @@ void WorldManager::init()
 		instanceMatrix.push_back(trans * rot * sca);
 	}
 
-	//cubeModel = Model("./models/Cube/cube.obj", instanceMatrix, 10000);
+	cubeModel = Model("./models/Cube/cube.obj", instanceMatrix, 100000);
 
 	lightManager = LightManager();
 	lightManager.addPointLight(PointLight());
 	lightManagerUi.setup(&lightManager);
 	camera = Camera(glm::vec3(0.0f, 2.0f, 10.0f));
-	//objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f), true));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f), true));
 }
 
 void WorldManager::update()
@@ -308,7 +308,7 @@ void WorldManager::update()
 
 	Model sponza = Model("./models/Sponza/sponza.obj");
 	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
-	objectManager.objects[0]->Scale(glm::vec3(0.01f, 0.01f, 0.01f));
+	objectManager.objects[1]->Scale(glm::vec3(0.01f, 0.01f, 0.01f));
 
 	GLuint uniformBlockIndexMatrices = glGetUniformBlockIndex(mainShader.getProgramID(), "Matrices");
 	GLuint uniformBlockIndexMatricesInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "Matrices");
@@ -330,7 +330,7 @@ void WorldManager::update()
 	glGenBuffers(1, &uboDirectionalLight);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboDirectionalLight);
 	//Magic number
-	glBufferData(GL_UNIFORM_BUFFER, 2640, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 5712, NULL, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboProjectionView);
@@ -362,17 +362,20 @@ void WorldManager::update()
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		mainShader.use();
-		mainShader.setVec3f("_camPos", camera.position);
-		mainShader.setFloat("material.specularStrength", 32.0f);
+
 		instancingShader.use();
 		instancingShader.setVec3f("_camPos", camera.position);
 		instancingShader.setFloat("material.specularStrength", 32.0f);
 		lightManager.drawLights(mainShader, uboDirectionalLight);
 		lightManager.drawLights(instancingShader, uboDirectionalLight);
+		mainShader.use();
+		mainShader.setVec3f("_camPos", camera.position);
+		mainShader.setFloat("material.specularStrength", 32.0f);
+		mainShader.setMat4f("view", view);
+		mainShader.setMat4f("projection", projection);
 		objectManager.draw(camera.position, mainShader, opacityShader, instancingShader);
 
-		glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+		glDepthFunc(GL_LEQUAL);
 		skyboxShader.use();
 		view = glm::mat4(glm::mat3(camera.getViewMatrix()));
 		skyboxShader.setMat4f("view", view);
@@ -389,7 +392,7 @@ void WorldManager::update()
 		glDisable(GL_DEPTH_TEST);
 
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		screenShader.use();
 		screenVAO.bind();

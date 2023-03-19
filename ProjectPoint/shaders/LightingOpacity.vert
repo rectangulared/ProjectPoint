@@ -20,8 +20,8 @@ uniform mat4 physicsTransform;
 void main()
 {
     camPos = _camPos;
-    FragPos = vec3(model * vec4(aPos, 1.0f));
+    FragPos = vec3(model * vec4(aPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal;
     TexCoord = aTex;
-    gl_Position = projection * view * model * vec4(aPos, 1.0f);
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

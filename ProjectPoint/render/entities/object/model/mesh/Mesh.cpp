@@ -7,8 +7,7 @@
         this->_textures = textures;
         this->_instanceMatrix = instanceMatrix;
         this->_instancing = instancing;
-        if (_instancing < 1) 
-            _instancing = 1;
+        if (_instancing < 1) { _instancing = 1; }
 
         VAO.bind();
 
@@ -17,13 +16,12 @@
         EBO EBO(_indices, GL_STATIC_DRAW);
 
         VAO.linkAttrib(VBO, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)0);
-        VAO.linkAttrib(VBO, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-        VAO.linkAttrib(VBO, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, color));
-        VAO.linkAttrib(VBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, textureUV));
+        VAO.linkAttrib(VBO, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)(1 * sizeof(glm::vec3)));
+        VAO.linkAttrib(VBO, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)(2 * sizeof(glm::vec3)));
+        VAO.linkAttrib(VBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)(3 * sizeof(glm::vec3)));
 
-        if (instancing != 1)
+        if (_instancing != 1)
         {
-            instanceVBO.bind();
             // Can't link to a mat4 so you need to link four vec4s
             VAO.linkAttrib(instanceVBO, 4, 4, GL_FLOAT, sizeof(glm::mat4), (void*)0);
             VAO.linkAttrib(instanceVBO, 5, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
@@ -64,7 +62,7 @@
         }
 
         VAO.bind();
-        if (_instancing == 0)
+        if (_instancing == 1)
         {
             glDrawElements(GL_TRIANGLES, static_cast<GLuint>(_indices.size()), GL_UNSIGNED_INT, 0);
         }

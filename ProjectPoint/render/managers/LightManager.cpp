@@ -37,10 +37,10 @@ void LightManager::drawLights(ShaderProgram& shaderProgram, const GLuint& ubo)
 	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLuint), &isDirectionalLightActive);
 	offset += 4;
-	GLuint pointLightsCount = pointLights.size();
+	GLint pointLightsCount = pointLights.size();
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLuint), &pointLightsCount);
 	offset += 4;
-	GLuint spotLightsCount = spotLights.size();
+	GLint spotLightsCount = spotLights.size();
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLuint), &spotLightsCount);
 	offset += 8;
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(directionalLight.direction));
@@ -102,6 +102,4 @@ void LightManager::drawLights(ShaderProgram& shaderProgram, const GLuint& ubo)
 	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	shaderProgram.setUInt("activeSpotLights", spotLights.size());
-
 }

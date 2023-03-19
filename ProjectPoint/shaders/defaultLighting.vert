@@ -8,7 +8,6 @@ layout (location = 2) in vec3 aColor;
 // Texture Coordinates
 layout (location = 3) in vec2 aTex;
 
-
 out VS_OUT
 {
     vec2 TexCoord;
@@ -29,8 +28,8 @@ uniform mat4 model;
 void main()
 {
     vs_out.camPos = _camPos;
-    vs_out.FragPos = vec3(model * vec4(aPos, 1.0f));
+    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
     vs_out.Normal = mat3(transpose(inverse(model))) * aNormal;
     vs_out.TexCoord = aTex;
-    gl_Position = projection * view * model * vec4(aPos, 1.0f);
-}  
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+}
