@@ -28,5 +28,5 @@ public:
 	void removePointLight(const GLuint& index);
 	void removeSpotLight(const GLuint& index);
 
-	void drawLights(ShaderProgram& shaderProgram, const GLuint& uboRangeIndex);
+	void drawLights(ShaderProgram& shaderProgram, const GLuint& uboDirectionalLight, const GLuint& uboPointLights, const GLuint& uboSpotLights);
 };

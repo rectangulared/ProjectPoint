@@ -3,6 +3,7 @@
 #include "utils/FileReadUtils.hpp"
 #include "render/entities/framebuffer/Framebuffer.h"
 #include <render/entities/object/model/texture/Cubemap.h>
+#include <render/entities/renderbuffer/Renderbuffer.h>
 
 float randf()
 {
@@ -190,8 +191,6 @@ void WorldManager::update()
 	ShaderProgram instancingShader = ShaderProgram(readTextFromFile("./shaders/instancing.vert"), readTextFromFile("./shaders/defaultLighting.frag"));
 	ShaderProgram screenShader = ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/default.frag"));
 	ShaderProgram skyboxShader = ShaderProgram(readTextFromFile("./shaders/skybox.vert"), readTextFromFile("./shaders/skybox.frag"));
-	//ShaderProgram test = ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/postEffect.frag"));
-	//ShaderProgram test2 = ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/postEffectNegative.frag"));
 
 	std::vector<std::string> faces
 	{
@@ -211,15 +210,14 @@ void WorldManager::update()
 	Texture framebufferTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB);
 	framebufferTexture.attachToCurrentFramebuffer(GL_COLOR_ATTACHMENT0);
 
-	GLuint rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	Renderbuffer rbo = Renderbuffer(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, SCREEN_WIDTH, SCREEN_HEIGHT);
+	rbo.bind();
 
 	fbo.unbind();
 
+	stbi_set_flip_vertically_on_load(true);
 	Model sponza = Model("./models/Sponza/sponza.obj");
+	stbi_set_flip_vertically_on_load(false);
 	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
 	objectManager.objects[1]->Scale(glm::vec3(0.01f, 0.01f, 0.01f));
 
@@ -233,6 +231,16 @@ void WorldManager::update()
 	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexDirectionalLight, 2);
 	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexDirectionalLightInstansing, 2);
 
+	GLuint uniformBlockIndexPointLights = glGetUniformBlockIndex(mainShader.getProgramID(), "PointLights");
+	GLuint uniformBlockIndexPointLightsInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "PointLights");
+	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexPointLights, 3);
+	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexPointLightsInstansing, 3);
+
+	GLuint uniformBlockIndexSpotLights = glGetUniformBlockIndex(mainShader.getProgramID(), "SpotLights");
+	GLuint uniformBlockIndexSpotLightsInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "SpotLights");
+	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexSpotLights, 4);
+	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexSpotLights, 4);
+
 	GLuint uboProjectionView;
 	glGenBuffers(1, &uboProjectionView);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboProjectionView);
@@ -242,12 +250,25 @@ void WorldManager::update()
 	GLuint uboDirectionalLight;
 	glGenBuffers(1, &uboDirectionalLight);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboDirectionalLight);
-	//Magic number
-	glBufferData(GL_UNIFORM_BUFFER, 5712, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 80, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	GLuint uboPointLights;
+	glGenBuffers(1, &uboPointLights);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboPointLights);
+	glBufferData(GL_UNIFORM_BUFFER, 2576, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	GLuint uboSpotLights;
+	glGenBuffers(1, &uboSpotLights);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboSpotLights);
+	glBufferData(GL_UNIFORM_BUFFER, 3088, NULL, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboProjectionView);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboDirectionalLight);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboPointLights);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 4, uboSpotLights);
 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f, 100.0f);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboProjectionView);
@@ -266,7 +287,7 @@ void WorldManager::update()
 		fbo.bind();
 		glEnable(GL_DEPTH_TEST);
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		
@@ -279,9 +300,11 @@ void WorldManager::update()
 		instancingShader.use();
 		instancingShader.setVec3f("_camPos", camera.position);
 		instancingShader.setFloat("material.specularStrength", 32.0f);
-		lightManager.drawLights(mainShader, uboDirectionalLight);
-		lightManager.drawLights(instancingShader, uboDirectionalLight);
+		cubemapTexture.bind();
+		lightManager.drawLights(mainShader, uboDirectionalLight, uboPointLights, uboSpotLights);
+		lightManager.drawLights(instancingShader, uboDirectionalLight, uboPointLights, uboSpotLights);
 		mainShader.use();
+		cubemapTexture.bind();
 		mainShader.setVec3f("_camPos", camera.position);
 		mainShader.setFloat("material.specularStrength", 32.0f);
 		mainShader.setMat4f("view", view);
