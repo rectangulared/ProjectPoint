@@ -19,7 +19,6 @@ Texture::Texture(const char* path, const char* textureType)
     this->path = path;
 	this->type = textureType;
 
-    stbi_set_flip_vertically_on_load(true);
 
     int width, height, nrComponents;
 
