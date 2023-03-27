@@ -4,6 +4,7 @@
 #include "render/entities/framebuffer/Framebuffer.h"
 #include <render/entities/object/model/texture/Cubemap.h>
 #include <render/entities/renderbuffer/Renderbuffer.h>
+#include <render/entities/buffers/UBO/UBO.h>
 
 float randf()
 {
@@ -221,59 +222,30 @@ void WorldManager::update()
 	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
 	objectManager.objects[1]->Scale(glm::vec3(0.01f, 0.01f, 0.01f));
 
-	GLuint uniformBlockIndexMatrices = glGetUniformBlockIndex(mainShader.getProgramID(), "Matrices");
-	GLuint uniformBlockIndexMatricesInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "Matrices");
-	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexMatrices, 1);
-	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexMatricesInstansing, 1);
+	UBO uboProjectionView = UBO(2 * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
+	uboProjectionView.assignBindingPoint(1, mainShader.getProgramID(), "Matrices");
+	uboProjectionView.assignBindingPoint(1, instancingShader.getProgramID(), "Matrices");
+	uboProjectionView.bindToTargetBase(1);
 
-	GLuint uniformBlockIndexDirectionalLight = glGetUniformBlockIndex(mainShader.getProgramID(), "DirectionalLight");
-	GLuint uniformBlockIndexDirectionalLightInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "DirectionalLight");
-	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexDirectionalLight, 2);
-	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexDirectionalLightInstansing, 2);
+	UBO uboDirectionalLight = UBO(80, GL_DYNAMIC_DRAW);
+	uboDirectionalLight.assignBindingPoint(2, mainShader.getProgramID(), "DirectionalLight");
+	uboDirectionalLight.assignBindingPoint(2, instancingShader.getProgramID(), "DirectionalLight");
+	uboDirectionalLight.bindToTargetBase(2);
 
-	GLuint uniformBlockIndexPointLights = glGetUniformBlockIndex(mainShader.getProgramID(), "PointLights");
-	GLuint uniformBlockIndexPointLightsInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "PointLights");
-	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexPointLights, 3);
-	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexPointLightsInstansing, 3);
+	UBO uboPointLights = UBO(2576, GL_DYNAMIC_DRAW);
+	uboPointLights.assignBindingPoint(3, mainShader.getProgramID(), "PointLights");
+	uboPointLights.assignBindingPoint(3, instancingShader.getProgramID(), "PointLights");
+	uboPointLights.bindToTargetBase(3);
 
-	GLuint uniformBlockIndexSpotLights = glGetUniformBlockIndex(mainShader.getProgramID(), "SpotLights");
-	GLuint uniformBlockIndexSpotLightsInstansing = glGetUniformBlockIndex(instancingShader.getProgramID(), "SpotLights");
-	glUniformBlockBinding(mainShader.getProgramID(), uniformBlockIndexSpotLights, 4);
-	glUniformBlockBinding(instancingShader.getProgramID(), uniformBlockIndexSpotLights, 4);
-
-	GLuint uboProjectionView;
-	glGenBuffers(1, &uboProjectionView);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboProjectionView);
-	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	GLuint uboDirectionalLight;
-	glGenBuffers(1, &uboDirectionalLight);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboDirectionalLight);
-	glBufferData(GL_UNIFORM_BUFFER, 80, NULL, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	GLuint uboPointLights;
-	glGenBuffers(1, &uboPointLights);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboPointLights);
-	glBufferData(GL_UNIFORM_BUFFER, 2576, NULL, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	GLuint uboSpotLights;
-	glGenBuffers(1, &uboSpotLights);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboSpotLights);
-	glBufferData(GL_UNIFORM_BUFFER, 3088, NULL, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboProjectionView);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboDirectionalLight);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboPointLights);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 4, uboSpotLights);
+	UBO uboSpotLights = UBO(3088, GL_DYNAMIC_DRAW);
+	uboSpotLights.assignBindingPoint(4, mainShader.getProgramID(), "SpotLights");
+	uboSpotLights.assignBindingPoint(4, instancingShader.getProgramID(), "SpotLights");
+	uboSpotLights.bindToTargetBase(4);
 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f, 100.0f);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboProjectionView);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	uboProjectionView.bind();
+	uboProjectionView.updateSubsetData(glm::value_ptr(projection), sizeof(glm::mat4), 0);
+	uboProjectionView.unbind();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -292,23 +264,18 @@ void WorldManager::update()
 
 		
 		glm::mat4 view = camera.getViewMatrix();
-		glBindBuffer(GL_UNIFORM_BUFFER, uboProjectionView);
-		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+		uboProjectionView.bind();
+		uboProjectionView.updateSubsetData(glm::value_ptr(view), sizeof(glm::mat4), sizeof(glm::mat4));
+		uboProjectionView.unbind();
 
 		instancingShader.use();
 		instancingShader.setVec3f("_camPos", camera.position);
 		instancingShader.setFloat("material.specularStrength", 32.0f);
-		cubemapTexture.bind();
-		lightManager.drawLights(mainShader, uboDirectionalLight, uboPointLights, uboSpotLights);
-		lightManager.drawLights(instancingShader, uboDirectionalLight, uboPointLights, uboSpotLights);
+		lightManager.drawLights(uboDirectionalLight, uboPointLights, uboSpotLights);
+		lightManager.drawLights(uboDirectionalLight, uboPointLights, uboSpotLights);
 		mainShader.use();
-		cubemapTexture.bind();
 		mainShader.setVec3f("_camPos", camera.position);
 		mainShader.setFloat("material.specularStrength", 32.0f);
-		mainShader.setMat4f("view", view);
-		mainShader.setMat4f("projection", projection);
 		objectManager.draw(camera.position, mainShader, opacityShader, instancingShader);
 
 		glDepthFunc(GL_LEQUAL);
@@ -319,19 +286,19 @@ void WorldManager::update()
 
 		skyboxVAO.bind();
 		cubemapTexture.bind();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
 		glDepthFunc(GL_LESS);
 		fbo.unbind();
 
 		glDisable(GL_DEPTH_TEST);
 
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		screenShader.use();
 		screenVAO.bind();
 		framebufferTexture.bind();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArrays(GL_TRIANGLES, 0, screenVertices.size());
 		screenVAO.unbind();
 
 		if (isMenuOpen)

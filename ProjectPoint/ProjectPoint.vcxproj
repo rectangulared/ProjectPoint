@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="render\entities\buffers\EBO\EBO.cpp" />
+    <ClCompile Include="render\entities\buffers\UBO\UBO.cpp" />
     <ClCompile Include="render\entities\buffers\VAO\VAO.cpp" />
     <ClCompile Include="render\entities\buffers\VBO\VBO.cpp" />
     <ClCompile Include="render\entities\camera\Camera.cpp" />
@@ -186,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="render\entities\buffers\EBO\EBO.h" />
+    <ClInclude Include="render\entities\buffers\UBO\UBO.h" />
     <ClInclude Include="render\entities\buffers\VAO\VAO.h" />
     <ClInclude Include="render\entities\buffers\VBO\VBO.h" />
     <ClInclude Include="render\entities\framebuffer\Framebuffer.h" />

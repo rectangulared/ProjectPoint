@@ -9,6 +9,7 @@
 #include "render/entities/light/DirectionalLight.h"
 #include "render/entities/light/PointLight.h"
 #include "render/entities/light/SpotLight.h"
+#include <render/entities/buffers/UBO/UBO.h>
 
 //TODO: Add possibility to inherit position from another object and offsets
 //TODO: Add light icons sprites at every light position
@@ -28,5 +29,5 @@ public:
 	void removePointLight(const GLuint& index);
 	void removeSpotLight(const GLuint& index);
 
-	void drawLights(ShaderProgram& shaderProgram, const GLuint& uboDirectionalLight, const GLuint& uboPointLights, const GLuint& uboSpotLights);
+	void drawLights(UBO& uboDirectionalLight, UBO& uboPointLights, UBO& uboSpotLights);
 };

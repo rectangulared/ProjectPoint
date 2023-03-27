@@ -30,80 +30,79 @@ void LightManager::removeSpotLight(const GLuint& index)
 	spotLights.erase(spotLights.begin() + index);
 }
 
-void LightManager::drawLights(ShaderProgram& shaderProgram, const GLuint& uboDirectionalLight, const GLuint& uboPointLights, const GLuint& uboSpotLights)
+void LightManager::drawLights(UBO& uboDirectionalLight, UBO& uboPointLights, UBO& uboSpotLights)
 {
-	shaderProgram.use();
 	GLuint offset = 0;
-	glBindBuffer(GL_UNIFORM_BUFFER, uboDirectionalLight);
-	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLuint), &isDirectionalLightActive);
+	uboDirectionalLight.bind();
+	uboDirectionalLight.updateSubsetData(&isDirectionalLightActive, sizeof(GLuint), offset);
 	offset += 16;
-	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(directionalLight.direction));
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.direction), sizeof(glm::vec3), offset);
 	offset += 16;
-	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(directionalLight.ambient));
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.ambient), sizeof(glm::vec3), offset);
 	offset += 16;
-	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(directionalLight.diffuse));
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.diffuse), sizeof(glm::vec3), offset);
 	offset += 16;
-	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(directionalLight.specular));
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.specular), sizeof(glm::vec3), offset);
 	//offset += 16;
+	uboDirectionalLight.unbind();
 
 	if (!pointLights.empty())
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uboPointLights);
 		offset = 0;
 		GLuint pointLightsCount = pointLights.size();
-		glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLuint), &pointLightsCount);
+		uboPointLights.bind();
+		uboPointLights.updateSubsetData(&pointLightsCount, sizeof(GLuint), offset);
 		offset += 16;
-		for (size_t i = 0; i < pointLights.size(); i++)
+		for (size_t i = 0; i < pointLightsCount; i++)
 		{
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(pointLights[i].position));
+			uboPointLights.updateSubsetData(glm::value_ptr(pointLights[i].position), sizeof(glm::vec3), offset);
 			offset += 12;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &pointLights[i].constant);
+			uboPointLights.updateSubsetData(&pointLights[i].constant, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &pointLights[i].linear);
+			uboPointLights.updateSubsetData(&pointLights[i].linear, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &pointLights[i].quadratic);
+			uboPointLights.updateSubsetData(&pointLights[i].quadratic, sizeof(GLfloat), offset);
 			offset += 12;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(pointLights[i].ambient));
+			uboPointLights.updateSubsetData(glm::value_ptr(pointLights[i].ambient), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(pointLights[i].diffuse));
+			uboPointLights.updateSubsetData(glm::value_ptr(pointLights[i].diffuse), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(pointLights[i].specular));
+			uboPointLights.updateSubsetData(glm::value_ptr(pointLights[i].specular), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-
 		}
+		uboPointLights.unbind();
 	}
 
 	if (!spotLights.empty())
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uboSpotLights);
 		offset = 0;
 		GLuint spotLightsCount = spotLights.size();
-		glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLuint), &spotLightsCount);
+		uboSpotLights.bind();
+		uboSpotLights.updateSubsetData(&spotLightsCount, sizeof(GLuint), offset);
 		offset += 16;
-		for (size_t i = 0; i < spotLights.size(); i++)
+		for (size_t i = 0; i < spotLightsCount; i++)
 		{
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(spotLights[i].direction));
+			uboPointLights.updateSubsetData(glm::value_ptr(spotLights[i].direction), sizeof(glm::vec3), offset);
 			offset += 12;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &spotLights[i].constant);
+			uboPointLights.updateSubsetData(&spotLights[i].constant, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &spotLights[i].linear);
+			uboPointLights.updateSubsetData(&spotLights[i].linear, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &spotLights[i].quadratic);
+			uboPointLights.updateSubsetData(&spotLights[i].quadratic, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &spotLights[i].cutOff);
+			uboPointLights.updateSubsetData(&spotLights[i].cutOff, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(GLfloat), &spotLights[i].outerCutOff);
+			uboPointLights.updateSubsetData(&spotLights[i].outerCutOff, sizeof(GLfloat), offset);
 			offset += 4;
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(spotLights[i].position));
+			uboPointLights.updateSubsetData(glm::value_ptr(spotLights[i].position), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(spotLights[i].ambient));
+			uboPointLights.updateSubsetData(glm::value_ptr(spotLights[i].ambient), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(spotLights[i].diffuse));
+			uboPointLights.updateSubsetData(glm::value_ptr(spotLights[i].diffuse), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec3), glm::value_ptr(spotLights[i].specular));
+			uboPointLights.updateSubsetData(glm::value_ptr(spotLights[i].specular), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
 		}
+		uboSpotLights.unbind();
 	}
-
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
