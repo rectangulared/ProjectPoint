@@ -361,6 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/ProjectPoint/models/Sphere/texture
-/ProjectPoint/models/skybox
-/ProjectPoint/imgui.ini
+ProjectPoint/models/
+ProjectPoint/imgui.ini
