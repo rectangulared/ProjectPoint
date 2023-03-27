@@ -211,6 +211,7 @@
     <ClInclude Include="utils\FileReadUtils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="imgui.ini" />
     <None Include="shaders\defaultLighting.frag" />
     <None Include="shaders\defaultLighting.vert" />
     <None Include="shaders\default.frag" />
