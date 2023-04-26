@@ -12,6 +12,8 @@ private:
 public:
 	Renderbuffer(const GLenum& internalFormat, const GLenum& attachment, const GLuint& width, const GLuint& height);
 
+	Renderbuffer(const GLenum& internalFormat, const GLenum& attachment, const GLuint& width, const GLuint& height, const GLuint& samples);
+
 	~Renderbuffer();
 
 	void bind();

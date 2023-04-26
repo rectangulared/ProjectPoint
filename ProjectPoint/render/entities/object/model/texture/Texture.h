@@ -9,12 +9,17 @@
 class Texture
 {
 public:
+	GLboolean isMultisampled;
 	GLuint _id;
+	GLuint _unit = 0;
 	std::string type;
 	std::string path;
 
-	Texture(unsigned int width, unsigned int height, GLenum format);
+	Texture(const GLuint& width, const GLuint& height, const GLenum& format);
+
 	Texture(const char* data, const char* textureType);
+
+	Texture(const GLuint& width, const GLuint& height, const GLenum& format, const GLuint& samples, const GLboolean& fixedSampleLocations);
 
 	void assignTextureUnit(ShaderProgram& shaderProgram, const char* uniform, GLuint unit);
 

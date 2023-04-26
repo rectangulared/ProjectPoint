@@ -41,6 +41,9 @@ private:
 	int SCREEN_WIDTH{ 1600 };
 	int SCREEN_HEIGHT{ 900 };
 
+	int SHADOW_MAP_WIDTH = 4096;
+	int SHADOW_MAP_HEIGHT = 4096;
+
 	bool firstMouse = true;
 	float lastX = SCREEN_WIDTH / 2.0f;
 	float lastY = SCREEN_HEIGHT / 2.0f;

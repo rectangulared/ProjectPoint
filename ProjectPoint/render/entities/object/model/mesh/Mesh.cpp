@@ -47,8 +47,6 @@
         GLuint opacityNr = 1;
         for (size_t i = 0; i < _textures.size(); i++)
         {
-            _textures[i].bind();
-
             std::string number;
             std::string name = _textures[i].type;
             if (name == "texture_diffuse")
@@ -59,6 +57,7 @@
                 number = std::to_string(opacityNr++);
 
             _textures[i].assignTextureUnit(shaderProgram, (name + number).c_str(), i);
+            _textures[i].bind();
         }
 
         VAO.bind();

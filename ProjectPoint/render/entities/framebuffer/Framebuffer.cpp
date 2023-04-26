@@ -1,13 +1,13 @@
 #include "Framebuffer.h"
 
-void Framebuffer::bind()
+void Framebuffer::bind(const GLenum& target)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, _id);
+	glBindFramebuffer(target, _id);
 }
 
-void  Framebuffer::unbind()
+void  Framebuffer::unbind(const GLenum& target)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(target, 0);
 }
 
 Framebuffer::Framebuffer() : _framebufferWidth(1920), _framebufferHeight(1080)

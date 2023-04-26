@@ -1,7 +1,9 @@
 #include "Texture.h"
 
-Texture::Texture(unsigned int width, unsigned int height, GLenum format)
+Texture::Texture(const GLuint& width, const GLuint& height, const GLenum& format)
 {
+    this->isMultisampled = false;
+
     glGenTextures(1, &_id);
     glBindTexture(GL_TEXTURE_2D, _id);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
@@ -16,9 +18,9 @@ Texture::Texture(unsigned int width, unsigned int height, GLenum format)
 
 Texture::Texture(const char* path, const char* textureType)
 {
+    this->isMultisampled = false;
     this->path = path;
 	this->type = textureType;
-
 
     int width, height, nrComponents;
 
@@ -50,8 +52,23 @@ Texture::Texture(const char* path, const char* textureType)
     }
 }
 
-void Texture::assignTextureUnit(ShaderProgram& shaderProgram, const char* uniform, GLuint unit)
+Texture::Texture(const GLuint& width, const GLuint& height, const GLenum& format, const GLuint& samples, const GLboolean& fixedSampleLocations)
 {
+    this->isMultisampled = true;
+    glGenTextures(1, &_id);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _id);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+}
+
+void Texture::assignTextureUnit(ShaderProgram& shaderProgram, const char* uniform, GLuint unit)
+{   
+    this->_unit = unit;
+
     GLuint textureUnit = glGetUniformLocation(shaderProgram.getProgramID(), uniform);
 
     shaderProgram.use();
@@ -61,11 +78,17 @@ void Texture::assignTextureUnit(ShaderProgram& shaderProgram, const char* unifor
 
 void Texture::bind()
 {
+    glActiveTexture(GL_TEXTURE0 + _unit);
     glBindTexture(GL_TEXTURE_2D, _id);
 }
 
 void Texture::attachToCurrentFramebuffer(GLenum attachment)
 {
+    if (isMultisampled)
+    {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D_MULTISAMPLE, _id, 0);
+        return;
+    }
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, _id, 0);
 }
 

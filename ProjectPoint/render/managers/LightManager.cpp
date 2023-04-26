@@ -38,6 +38,8 @@ void LightManager::drawLights(UBO& uboDirectionalLight, UBO& uboPointLights, UBO
 	offset += 16;
 	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.direction), sizeof(glm::vec3), offset);
 	offset += 16;
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.position), sizeof(glm::vec3), offset);
+	offset += 16;
 	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.ambient), sizeof(glm::vec3), offset);
 	offset += 16;
 	uboDirectionalLight.updateSubsetData(glm::value_ptr(directionalLight.diffuse), sizeof(glm::vec3), offset);

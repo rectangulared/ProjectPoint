@@ -107,12 +107,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
     std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
     if (opaque)
     {
         std::vector<Texture> opacityMaps = loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity");
         textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
     }
-        return Mesh(vertices, indices, textures, _instanceMatrix, _instancing);
+
+    return Mesh(vertices, indices, textures, _instanceMatrix, _instancing);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

@@ -69,7 +69,7 @@ void WorldManager::init()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	mainShader = ShaderProgram(readTextFromFile("./shaders/defaultLighting.vert"), readTextFromFile("./shaders/defaultLighting.frag"));
-	opacityShader = ShaderProgram(readTextFromFile("./shaders/LightingOpacity.vert"), readTextFromFile("./shaders/LightingOpacity.frag"));
+	opacityShader = ShaderProgram(readTextFromFile("./shaders/defaultLighting.vert"), readTextFromFile("./shaders/LightingOpacity.frag"));
 
 	std::vector <glm::mat4> instanceMatrix;
 
@@ -80,8 +80,6 @@ void WorldManager::init()
 		float y = ((rand() % 2) * 2 - 1) * sqrt(1.0f - x * x);
 
 		glm::vec3 tempTranslation;
-		glm::quat tempRotation;
-		glm::vec3 tempScale;
 
 		if (randf() > 0.5f)
 		{
@@ -92,27 +90,32 @@ void WorldManager::init()
 			tempTranslation = glm::vec3(x * finalRadius, randf(), y * finalRadius);
 		}
 
-		tempRotation = glm::quat(1.0f, randf(), randf(), randf());
-		tempScale = 0.1f * glm::vec3(randf(), randf(), randf());
-
 		glm::mat4 trans = glm::mat4(1.0f);
-		glm::mat4 rot = glm::mat4(1.0f);
-		glm::mat4 sca = glm::mat4(1.0f);
 
 		trans = glm::translate(trans, tempTranslation);
-		rot = glm::mat4_cast(tempRotation);
-		sca = glm::scale(sca, tempScale);
 
 		instanceMatrix.push_back(trans);
 	}
 
-	cubeModel = Model("./models/Cube/cube.obj", instanceMatrix, 100000);
+	cubeModel = Model("./models/Cube/cube.obj");
 
 	lightManager = LightManager();
-	lightManager.addPointLight(PointLight());
+	//lightManager.addPointLight(PointLight());
 	lightManagerUi.setup(&lightManager);
-	camera = Camera(glm::vec3(0.0f, 2.0f, 10.0f));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f), true));
+	camera = Camera(glm::vec3(0.0f, 2.0f, 0.0f));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
+	objectManager.objects[6]->translate(glm::vec3(0.0f, 0.0f, 0.0f));
+	objectManager.objects[6]->Scale(glm::vec3(10.0f, 1.0f, 10.0f));
+	for (int i = 0; i < 5; i++)
+	{
+		objectManager.objects[i]->translate(glm::vec3(0.0f, i, -i + 5));
+	}
 }
 
 void WorldManager::update()
@@ -192,6 +195,9 @@ void WorldManager::update()
 	ShaderProgram instancingShader = ShaderProgram(readTextFromFile("./shaders/instancing.vert"), readTextFromFile("./shaders/defaultLighting.frag"));
 	ShaderProgram screenShader = ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/default.frag"));
 	ShaderProgram skyboxShader = ShaderProgram(readTextFromFile("./shaders/skybox.vert"), readTextFromFile("./shaders/skybox.frag"));
+	ShaderProgram debugLightPositionShader = ShaderProgram(readTextFromFile("./shaders/debugLightCube.vert"), readTextFromFile("./shaders/debugLightCube.frag"));
+
+	screenShader.use();
 
 	std::vector<std::string> faces
 	{
@@ -206,28 +212,36 @@ void WorldManager::update()
 	Cubemap cubemapTexture = Cubemap(faces);
 
 	Framebuffer fbo;
-	fbo.bind();
+	fbo.bind(GL_FRAMEBUFFER);
 
-	Texture framebufferTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB);
+	Texture framebufferTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, 4, GL_TRUE);
 	framebufferTexture.attachToCurrentFramebuffer(GL_COLOR_ATTACHMENT0);
 
-	Renderbuffer rbo = Renderbuffer(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, SCREEN_WIDTH, SCREEN_HEIGHT);
+	Renderbuffer rbo = Renderbuffer(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, SCREEN_WIDTH, SCREEN_HEIGHT, 4);
 	rbo.bind();
 
-	fbo.unbind();
+	fbo.unbind(GL_FRAMEBUFFER);
+
+	Framebuffer postProcessingFBO;
+
+	postProcessingFBO.bind(GL_FRAMEBUFFER);
+	Texture postProcessingFBOTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_SRGB);
+	postProcessingFBOTexture.attachToCurrentFramebuffer(GL_COLOR_ATTACHMENT0);
+	postProcessingFBO.unbind(GL_FRAMEBUFFER);
 
 	stbi_set_flip_vertically_on_load(true);
 	Model sponza = Model("./models/Sponza/sponza.obj");
 	stbi_set_flip_vertically_on_load(false);
 	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
-	objectManager.objects[1]->Scale(glm::vec3(0.01f, 0.01f, 0.01f));
+	objectManager.objects[7]->Scale(glm::vec3(0.05f, 0.05f, 0.05f));
 
 	UBO uboProjectionView = UBO(2 * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
 	uboProjectionView.assignBindingPoint(1, mainShader.getProgramID(), "Matrices");
 	uboProjectionView.assignBindingPoint(1, instancingShader.getProgramID(), "Matrices");
+	uboProjectionView.assignBindingPoint(1, debugLightPositionShader.getProgramID(), "Matrices");
 	uboProjectionView.bindToTargetBase(1);
 
-	UBO uboDirectionalLight = UBO(80, GL_DYNAMIC_DRAW);
+	UBO uboDirectionalLight = UBO(96, GL_DYNAMIC_DRAW);
 	uboDirectionalLight.assignBindingPoint(2, mainShader.getProgramID(), "DirectionalLight");
 	uboDirectionalLight.assignBindingPoint(2, instancingShader.getProgramID(), "DirectionalLight");
 	uboDirectionalLight.bindToTargetBase(2);
@@ -247,6 +261,33 @@ void WorldManager::update()
 	uboProjectionView.updateSubsetData(glm::value_ptr(projection), sizeof(glm::mat4), 0);
 	uboProjectionView.unbind();
 
+	Framebuffer shadowFBO = Framebuffer(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+	Texture shadowMap = Texture(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, GL_DEPTH_COMPONENT);
+	shadowFBO.bind(GL_FRAMEBUFFER);
+	shadowMap.bind();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	shadowMap.attachToCurrentFramebuffer(GL_DEPTH_ATTACHMENT);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	shadowFBO.unbind(GL_FRAMEBUFFER);
+
+	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
+	glm::mat4 lightView = glm::lookAt(lightManager.directionalLight.position, lightManager.directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightSpaceMatrix = orthgonalProjection * lightView;
+
+	ShaderProgram shadowProgram = ShaderProgram(readTextFromFile("./shaders/depth.vert"), readTextFromFile("./shaders/depth.frag"));
+	shadowProgram.use();
+	shadowProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+
+	ShaderProgram shadowInstanceProgram = ShaderProgram(readTextFromFile("./shaders/depthInstance.vert"), readTextFromFile("./shaders/depth.frag"));
+	shadowInstanceProgram.use();
+	shadowInstanceProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		//TODO: Make separate render manager
@@ -256,7 +297,30 @@ void WorldManager::update()
 
 		processInput();
 
-		fbo.bind();
+		// Depth testing needed for Shadow Map
+		glEnable(GL_DEPTH_TEST);
+
+		// Preparations for the Shadow Map
+		glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+		shadowFBO.bind(GL_FRAMEBUFFER);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_FRONT);
+		lightView = glm::lookAt(lightManager.directionalLight.position, lightManager.directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
+		lightSpaceMatrix = orthgonalProjection * lightView;
+
+		shadowProgram.use();
+		shadowProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+
+		shadowInstanceProgram.use();
+		shadowInstanceProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		
+		objectManager.draw(lightManager.directionalLight.position, shadowProgram, shadowProgram, shadowInstanceProgram);
+		glCullFace(GL_BACK);
+		shadowFBO.unbind(GL_FRAMEBUFFER);
+		
+		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		fbo.bind(GL_FRAMEBUFFER);
 		glEnable(GL_DEPTH_TEST);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -268,15 +332,37 @@ void WorldManager::update()
 		uboProjectionView.updateSubsetData(glm::value_ptr(view), sizeof(glm::mat4), sizeof(glm::mat4));
 		uboProjectionView.unbind();
 
+		lightManager.drawLights(uboDirectionalLight, uboPointLights, uboSpotLights);
 		instancingShader.use();
 		instancingShader.setVec3f("_camPos", camera.position);
-		instancingShader.setFloat("material.specularStrength", 32.0f);
-		lightManager.drawLights(uboDirectionalLight, uboPointLights, uboSpotLights);
-		lightManager.drawLights(uboDirectionalLight, uboPointLights, uboSpotLights);
+		instancingShader.setFloat("material.specularStrength", 64.0f);
+		instancingShader.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shadowMap.assignTextureUnit(instancingShader, "shadowMap", 3);
+		shadowMap.bind();
 		mainShader.use();
 		mainShader.setVec3f("_camPos", camera.position);
-		mainShader.setFloat("material.specularStrength", 32.0f);
+		mainShader.setFloat("material.specularStrength", 64.0f);
+		mainShader.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shadowMap.assignTextureUnit(mainShader, "shadowMap", 3);
+		shadowMap.bind();
 		objectManager.draw(camera.position, mainShader, opacityShader, instancingShader);
+
+		debugLightPositionShader.use();
+		for (auto& pl : lightManager.pointLights)
+		{
+			debugLightPositionShader.setVec3f("color", pl.diffuse);
+			debugLightPositionShader.setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), pl.position), glm::vec3(0.1f, 0.1f, 0.1f)));
+			skyboxVAO.bind();
+			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
+		}
+
+		for (auto& sp : lightManager.spotLights)
+		{
+			debugLightPositionShader.setVec3f("color", sp.diffuse);
+			debugLightPositionShader.setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), sp.position), glm::vec3(0.1f, 0.1f, 0.1f)));
+			skyboxVAO.bind();
+			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
+		}
 
 		glDepthFunc(GL_LEQUAL);
 		skyboxShader.use();
@@ -288,16 +374,17 @@ void WorldManager::update()
 		cubemapTexture.bind();
 		glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
 		glDepthFunc(GL_LESS);
-		fbo.unbind();
 
-		glDisable(GL_DEPTH_TEST);
+		fbo.bind(GL_READ_FRAMEBUFFER);
+		postProcessingFBO.bind(GL_DRAW_FRAMEBUFFER);
+		glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		screenShader.use();
+		glDisable(GL_DEPTH_TEST);
 		screenVAO.bind();
-		framebufferTexture.bind();
+		postProcessingFBOTexture.bind();
 		glDrawArrays(GL_TRIANGLES, 0, screenVertices.size());
 		screenVAO.unbind();
 
@@ -307,7 +394,7 @@ void WorldManager::update()
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			lightManagerUi.draw();
-			ImGui::Image((void*)(intptr_t)framebufferTexture._id, ImVec2(320, 240));
+			ImGui::Image((void*)(intptr_t)shadowMap._id, ImVec2(320, 240));
 			ImGui::Render();
 			int display_w, display_h;
 			glfwGetFramebufferSize(window, &display_w, &display_h);

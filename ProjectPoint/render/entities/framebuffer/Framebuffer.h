@@ -11,8 +11,8 @@ private:
 
 public:
 
-	void bind();
-	void unbind();
+	void bind(const GLenum& target);
+	void unbind(const GLenum& target);
 	Framebuffer();
 	Framebuffer(GLuint framebufferWidth, GLuint framebufferHeight);
 	~Framebuffer();

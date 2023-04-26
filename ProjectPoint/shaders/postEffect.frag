@@ -1,5 +1,5 @@
 #version 460 core
-out vec4 FragColor;
+out vec4 fragColor;
 
 in vec2 TexCoords;
 
@@ -36,5 +36,5 @@ void main()
     for(int i = 0; i < 9; i++)
         col += sampleTex[i] * kernel[i];
     
-    FragColor = vec4(col, 1.0);
+    fragColor = vec4(col, 1.0);
 } 

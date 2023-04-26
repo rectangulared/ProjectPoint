@@ -212,13 +212,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
+    <None Include="shaders\debugLightCube.frag" />
+    <None Include="shaders\debugLightCube.vert" />
     <None Include="shaders\defaultLighting.frag" />
     <None Include="shaders\defaultLighting.vert" />
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
+    <None Include="shaders\depth.frag" />
+    <None Include="shaders\depth.vert" />
+    <None Include="shaders\depthInstance.vert" />
     <None Include="shaders\instancing.vert" />
     <None Include="shaders\LightingOpacity.frag" />
-    <None Include="shaders\LightingOpacity.vert" />
     <None Include="shaders\postEffect.frag" />
     <None Include="shaders\postEffectNegative.frag" />
     <None Include="shaders\skybox.frag" />

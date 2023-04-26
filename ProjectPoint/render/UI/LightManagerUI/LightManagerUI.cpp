@@ -19,6 +19,7 @@ void LightManagerUI::draw()
 	ImGui::Text("Directional Light");
 
 	ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(ptr_LightManager->directionalLight.direction), -100.0f, 100.0f, "%.3f", 0);
+	ImGui::SliderFloat3("Directional Light Position", glm::value_ptr(ptr_LightManager->directionalLight.position), -100.0f, 100.0f, "%.3f", 0);
 	ImGui::SliderFloat3("Directional Light Ambient", glm::value_ptr(ptr_LightManager->directionalLight.ambient), 0.0f, 1.0f, "%.3f", 0);
 	ImGui::SliderFloat3("Directional Light Diffuse", glm::value_ptr(ptr_LightManager->directionalLight.diffuse), 0.0f, 1.0f, "%.3f", 0);
 	ImGui::SliderFloat3("Directional Light Specular", glm::value_ptr(ptr_LightManager->directionalLight.specular), 0.0f, 1.0f, "%.3f", 0);
