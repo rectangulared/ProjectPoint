@@ -140,6 +140,7 @@ vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture
 vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture)
 {
 	vec4 ambient = vec4(light.ambient, 1.0) * texture(material.texture_diffuse1, fs_in.texCoords);
+
 	if(ambient.a < 0.01)
 	{
 		discard;
@@ -147,7 +148,6 @@ vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec4 cubemapTex
 	}
 
 	vec3 lightDir = normalize(light.position - fs_in.fragPos);
-
 	float diff = max(dot(normal, lightDir), 0.0);
 
 	vec3 halfwayDir = normalize(lightDir + viewDir);  
@@ -171,13 +171,14 @@ vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec4 cubemapTex
 vec4 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture)
 {   
 	vec4 ambient = vec4(light.ambient, 1.0) * texture(material.texture_diffuse1, fs_in.texCoords);
+
 	if(ambient.a < 0.01)
 	{
 		discard;
 		return vec4(0.0);
 	}
-	vec3 lightDir = normalize(light.position - fs_in.fragPos);
 
+	vec3 lightDir = normalize(light.position - fs_in.fragPos);
 	float diff = max(dot(normal, lightDir), 0.0);
 
 	vec3 halfwayDir = normalize(lightDir + viewDir);  

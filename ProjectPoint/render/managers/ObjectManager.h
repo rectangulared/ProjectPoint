@@ -8,7 +8,7 @@
 class ObjectManager
 {
 public:
-	std::vector<Object*> objects;
+	std::vector<Object*> _objects;
 
 	ObjectManager();
 	~ObjectManager();

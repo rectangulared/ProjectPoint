@@ -129,6 +129,9 @@
     <ClCompile Include="render\entities\buffers\UBO\UBO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\entities\storage\shaderStorage\ShaderStorage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\FileReadUtils.hpp">
@@ -198,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="render\entities\buffers\UBO\UBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\entities\storage\shaderStorage\ShaderStorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

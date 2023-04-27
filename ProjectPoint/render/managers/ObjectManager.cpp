@@ -4,35 +4,35 @@ ObjectManager::ObjectManager() {};
 
 ObjectManager::~ObjectManager()
 {
-	for (auto o : objects)
+	for (auto o : _objects)
 	{
 		delete o;
 	}
-	objects.clear();
+	_objects.clear();
 };
 
 void ObjectManager::addObject(Object* object)
 {
-	objects.push_back(object);
+	_objects.push_back(object);
 }
 
 void ObjectManager::draw(const glm::vec3& cameraPosition, ShaderProgram& opaqueShaderProgram, ShaderProgram& transparentShaderProgram, ShaderProgram& instancingShaderProgram)
 {
 	std::map<float, Object*> sorted;
-	for (size_t i = 0; i < objects.size(); i++)
+	for (size_t i = 0; i < _objects.size(); i++)
 	{
-		if (objects[i]->isModelOpaque() && !objects[i]->_instancing)
+		if (_objects[i]->isModelOpaque() && !_objects[i]->_instancing)
 		{
-			objects[i]->draw(opaqueShaderProgram);
+			_objects[i]->draw(opaqueShaderProgram);
 		}
-		else if (objects[i]->_instancing)
+		else if (_objects[i]->_instancing)
 		{
-			objects[i]->draw(instancingShaderProgram);
+			_objects[i]->draw(instancingShaderProgram);
 		}
 		else
 		{
-			float distance = glm::length(cameraPosition - objects[i]->getTranslation());
-			sorted[distance] = objects[i];
+			float distance = glm::length(cameraPosition - _objects[i]->getTranslation());
+			sorted[distance] = _objects[i];
 		}
 	}
 
@@ -41,8 +41,8 @@ void ObjectManager::draw(const glm::vec3& cameraPosition, ShaderProgram& opaqueS
 		//Sorting all half-transparent objects before rendering them
 		for (std::map<float, Object*>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it)
 		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, it->second->getTranslation());
+			glm::mat4 _model = glm::mat4(1.0f);
+			_model = glm::translate(_model, it->second->getTranslation());
 			it->second->draw(transparentShaderProgram);
 		}
 	}

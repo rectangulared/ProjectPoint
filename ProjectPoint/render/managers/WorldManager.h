@@ -15,6 +15,7 @@
 #include "render/managers/LightManager.h"
 #include "render/managers/ObjectManager.h"
 #include "render/entities/object/Object.h"
+#include <render/entities/storage/shaderStorage/ShaderStorage.h>
 
 class WorldManager
 {
@@ -35,7 +36,7 @@ public:
 protected:
 	WorldManager();
 
-	static WorldManager* worldManager_;
+	static WorldManager* _worldManager;
 
 private:
 	int SCREEN_WIDTH{ 1600 };
@@ -50,14 +51,12 @@ private:
 	Camera camera;
 
 	bool isMenuOpen = false;
-	bool isItemSpawned = false;
 	float deltaTime = 0.0f;
 	float lastFrame = 0.0f;
 
 	GLFWwindow* window;
 
-	ShaderProgram mainShader;
-	ShaderProgram opacityShader;
+	ShaderStorage shaderStorage;
 
 	Model cubeModel;
 
@@ -67,15 +66,10 @@ private:
 
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
-		{
-			worldManager_->isItemSpawned = !worldManager_->isItemSpawned;
-		}
-
 		if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
 		{
-			worldManager_->isMenuOpen = !worldManager_->isMenuOpen;
-			if (worldManager_->isMenuOpen)
+			_worldManager->isMenuOpen = !_worldManager->isMenuOpen;
+			if (_worldManager->isMenuOpen)
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			else
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -84,37 +78,37 @@ private:
 
 	static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	{
-		if (!worldManager_->isMenuOpen)
+		if (!_worldManager->isMenuOpen)
 		{
 			float xpos = static_cast<float>(xposIn);
 			float ypos = static_cast<float>(yposIn);
 
-			if (worldManager_->firstMouse)
+			if (_worldManager->firstMouse)
 			{
-				worldManager_->lastX = xpos;
-				worldManager_->lastY = ypos;
-				worldManager_->firstMouse = false;
+				_worldManager->lastX = xpos;
+				_worldManager->lastY = ypos;
+				_worldManager->firstMouse = false;
 			}
 
-			float xoffset = xpos - worldManager_->lastX;
-			float yoffset = worldManager_->lastY - ypos;
+			float xoffset = xpos - _worldManager->lastX;
+			float yoffset = _worldManager->lastY - ypos;
 
-			worldManager_->lastX = xpos;
-			worldManager_->lastY = ypos;
+			_worldManager->lastX = xpos;
+			_worldManager->lastY = ypos;
 
-			worldManager_->camera.processMouseMovement(xoffset, yoffset);
+			_worldManager->camera.processMouseMovement(xoffset, yoffset);
 		}
 	}
 
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		worldManager_->camera.processMouseScroll(static_cast<float>(yoffset));
+		_worldManager->camera.processMouseScroll(static_cast<float>(yoffset));
 	}
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
-		worldManager_->SCREEN_WIDTH = width;
-		worldManager_->SCREEN_HEIGHT = height;
+		_worldManager->SCREEN_WIDTH = width;
+		_worldManager->SCREEN_HEIGHT = height;
 		glViewport(0, 0, width, height);
 	}
 

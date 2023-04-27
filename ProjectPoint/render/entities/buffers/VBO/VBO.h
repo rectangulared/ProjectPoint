@@ -12,7 +12,13 @@ struct Vertex
     glm::vec3 color;
     glm::vec2 textureUV;
 
-    Vertex() {};
+    Vertex() 
+    {
+        position = glm::vec3(0.0);
+        normal = glm::vec3(0.0);
+        color = glm::vec3(0.0);
+        textureUV = glm::vec2(0.0);
+    };
 
     Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& color, const glm::vec2& textureUV)
     {

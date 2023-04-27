@@ -1,10 +1,9 @@
 #include "Renderbuffer.h"
 
-Renderbuffer::Renderbuffer(const GLenum& internalFormat, const GLenum& attachment,const GLuint& width, const GLuint& height)
+Renderbuffer::Renderbuffer(const GLenum& internalFormat, const GLenum& attachment,const GLuint& width, const GLuint& height) : 
+	_rbWidth(width),
+	_rbHeight(height)
 {
-	this->_rbWidth = width;
-	this->_rbHeight = height;
-
 	glGenRenderbuffers(1, &_id);
 	glBindRenderbuffer(GL_RENDERBUFFER, _id);
 	glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, width, height);
@@ -12,11 +11,10 @@ Renderbuffer::Renderbuffer(const GLenum& internalFormat, const GLenum& attachmen
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-Renderbuffer::Renderbuffer(const GLenum& internalFormat, const GLenum& attachment, const GLuint& width, const GLuint& height, const GLuint& samples)
+Renderbuffer::Renderbuffer(const GLenum& internalFormat, const GLenum& attachment, const GLuint& width, const GLuint& height, const GLuint& samples) :
+	_rbWidth(width),
+	_rbHeight(height)
 {
-	this->_rbWidth = width;
-	this->_rbHeight = height;
-
 	glGenRenderbuffers(1, &_id);
 	glBindRenderbuffer(GL_RENDERBUFFER, _id);
 	glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, internalFormat, width, height);

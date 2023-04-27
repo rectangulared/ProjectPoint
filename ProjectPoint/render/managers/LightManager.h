@@ -16,13 +16,14 @@
 class LightManager
 {
 public:
-	GLboolean isDirectionalLightActive;
+	GLboolean _isDirectionalLightActive;
 
-	DirectionalLight directionalLight;
-	std::vector<PointLight> pointLights;
-	std::vector<SpotLight> spotLights;
+	DirectionalLight _directionalLight;
+	std::vector<PointLight> _pointLights;
+	std::vector<SpotLight> _spotLights;
+
 	LightManager();
-	LightManager(const DirectionalLight& _directionalLight, const std::vector<PointLight>& _pointLights, std::vector<SpotLight> _spotLights);
+	LightManager(const DirectionalLight& directionalLight, const std::vector<PointLight>& pointLights, std::vector<SpotLight> spotLights);
 
 	void addPointLight(const PointLight& pointLight);
 	void addSpotLight(const SpotLight& spotLight);

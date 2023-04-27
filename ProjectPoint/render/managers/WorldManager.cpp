@@ -11,13 +11,13 @@ float randf()
 	return -1.0f + (rand() / (RAND_MAX / 2.0f));
 }
 
-WorldManager* WorldManager::worldManager_ = nullptr;
+WorldManager* WorldManager::_worldManager = nullptr;
 
 WorldManager* WorldManager::getInstance()
 {
-	if (worldManager_ == nullptr)
-		worldManager_ = new WorldManager();
-	return worldManager_;
+	if (_worldManager == nullptr)
+		_worldManager = new WorldManager();
+	return _worldManager;
 }
 
 WorldManager::WorldManager() 
@@ -68,8 +68,14 @@ void WorldManager::init()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	mainShader = ShaderProgram(readTextFromFile("./shaders/defaultLighting.vert"), readTextFromFile("./shaders/defaultLighting.frag"));
-	opacityShader = ShaderProgram(readTextFromFile("./shaders/defaultLighting.vert"), readTextFromFile("./shaders/LightingOpacity.frag"));
+	shaderStorage.addShaderProgram("mainShader", ShaderProgram(readTextFromFile("./shaders/defaultLighting.vert"), readTextFromFile("./shaders/defaultLighting.frag")));
+	shaderStorage.addShaderProgram("opacityShader", ShaderProgram(readTextFromFile("./shaders/defaultLighting.vert"), readTextFromFile("./shaders/LightingOpacity.frag")));
+	shaderStorage.addShaderProgram("instancingShader", ShaderProgram(readTextFromFile("./shaders/instancing.vert"), readTextFromFile("./shaders/defaultLighting.frag")));
+	shaderStorage.addShaderProgram("screenShader", ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/default.frag")));
+	shaderStorage.addShaderProgram("skyboxShader", ShaderProgram(readTextFromFile("./shaders/skybox.vert"), readTextFromFile("./shaders/skybox.frag")));
+	shaderStorage.addShaderProgram("debugLightPositionShader", ShaderProgram(readTextFromFile("./shaders/debugLightCube.vert"), readTextFromFile("./shaders/debugLightCube.frag")));
+	shaderStorage.addShaderProgram("shadowProgram", ShaderProgram(readTextFromFile("./shaders/depth.vert"), readTextFromFile("./shaders/depth.frag")));
+	shaderStorage.addShaderProgram("shadowInstanceProgram", ShaderProgram(readTextFromFile("./shaders/depthInstance.vert"), readTextFromFile("./shaders/depth.frag")));
 
 	std::vector <glm::mat4> instanceMatrix;
 
@@ -100,7 +106,6 @@ void WorldManager::init()
 	cubeModel = Model("./models/Cube/cube.obj");
 
 	lightManager = LightManager();
-	//lightManager.addPointLight(PointLight());
 	lightManagerUi.setup(&lightManager);
 	camera = Camera(glm::vec3(0.0f, 2.0f, 0.0f));
 	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
@@ -110,11 +115,11 @@ void WorldManager::init()
 	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
 	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
 	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.objects[6]->translate(glm::vec3(0.0f, 0.0f, 0.0f));
-	objectManager.objects[6]->Scale(glm::vec3(10.0f, 1.0f, 10.0f));
+	objectManager._objects[6]->translate(glm::vec3(0.0f, 0.0f, 0.0f));
+	objectManager._objects[6]->scale(glm::vec3(10.0f, 1.0f, 10.0f));
 	for (int i = 0; i < 5; i++)
 	{
-		objectManager.objects[i]->translate(glm::vec3(0.0f, i, -i + 5));
+		objectManager._objects[i]->translate(glm::vec3(0.0f, i, -i + 5));
 	}
 }
 
@@ -192,13 +197,6 @@ void WorldManager::update()
 	skyboxVAO.unbind();
 	skyboxVBO.unbind();
 
-	ShaderProgram instancingShader = ShaderProgram(readTextFromFile("./shaders/instancing.vert"), readTextFromFile("./shaders/defaultLighting.frag"));
-	ShaderProgram screenShader = ShaderProgram(readTextFromFile("./shaders/default.vert"), readTextFromFile("./shaders/default.frag"));
-	ShaderProgram skyboxShader = ShaderProgram(readTextFromFile("./shaders/skybox.vert"), readTextFromFile("./shaders/skybox.frag"));
-	ShaderProgram debugLightPositionShader = ShaderProgram(readTextFromFile("./shaders/debugLightCube.vert"), readTextFromFile("./shaders/debugLightCube.frag"));
-
-	screenShader.use();
-
 	std::vector<std::string> faces
 	{
 		"models/skybox/right.jpg",
@@ -233,27 +231,27 @@ void WorldManager::update()
 	Model sponza = Model("./models/Sponza/sponza.obj");
 	stbi_set_flip_vertically_on_load(false);
 	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
-	objectManager.objects[7]->Scale(glm::vec3(0.05f, 0.05f, 0.05f));
+	objectManager._objects[7]->scale(glm::vec3(0.05f, 0.05f, 0.05f));
 
 	UBO uboProjectionView = UBO(2 * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
-	uboProjectionView.assignBindingPoint(1, mainShader.getProgramID(), "Matrices");
-	uboProjectionView.assignBindingPoint(1, instancingShader.getProgramID(), "Matrices");
-	uboProjectionView.assignBindingPoint(1, debugLightPositionShader.getProgramID(), "Matrices");
+	uboProjectionView.assignBindingPoint(1, shaderStorage.getShaderProgram("mainShader")->getProgramID(), "Matrices");
+	uboProjectionView.assignBindingPoint(1, shaderStorage.getShaderProgram("instancingShader")->getProgramID(), "Matrices");
+	uboProjectionView.assignBindingPoint(1, shaderStorage.getShaderProgram("debugLightPositionShader")->getProgramID(), "Matrices");
 	uboProjectionView.bindToTargetBase(1);
 
 	UBO uboDirectionalLight = UBO(96, GL_DYNAMIC_DRAW);
-	uboDirectionalLight.assignBindingPoint(2, mainShader.getProgramID(), "DirectionalLight");
-	uboDirectionalLight.assignBindingPoint(2, instancingShader.getProgramID(), "DirectionalLight");
+	uboDirectionalLight.assignBindingPoint(2, shaderStorage.getShaderProgram("mainShader")->getProgramID(), "DirectionalLight");
+	uboDirectionalLight.assignBindingPoint(2, shaderStorage.getShaderProgram("instancingShader")->getProgramID(), "DirectionalLight");
 	uboDirectionalLight.bindToTargetBase(2);
 
 	UBO uboPointLights = UBO(2576, GL_DYNAMIC_DRAW);
-	uboPointLights.assignBindingPoint(3, mainShader.getProgramID(), "PointLights");
-	uboPointLights.assignBindingPoint(3, instancingShader.getProgramID(), "PointLights");
+	uboPointLights.assignBindingPoint(3, shaderStorage.getShaderProgram("mainShader")->getProgramID(), "PointLights");
+	uboPointLights.assignBindingPoint(3, shaderStorage.getShaderProgram("instancingShader")->getProgramID(), "PointLights");
 	uboPointLights.bindToTargetBase(3);
 
 	UBO uboSpotLights = UBO(3088, GL_DYNAMIC_DRAW);
-	uboSpotLights.assignBindingPoint(4, mainShader.getProgramID(), "SpotLights");
-	uboSpotLights.assignBindingPoint(4, instancingShader.getProgramID(), "SpotLights");
+	uboSpotLights.assignBindingPoint(4, shaderStorage.getShaderProgram("mainShader")->getProgramID(), "SpotLights");
+	uboSpotLights.assignBindingPoint(4, shaderStorage.getShaderProgram("instancingShader")->getProgramID(), "SpotLights");
 	uboSpotLights.bindToTargetBase(4);
 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f, 100.0f);
@@ -277,16 +275,14 @@ void WorldManager::update()
 	shadowFBO.unbind(GL_FRAMEBUFFER);
 
 	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
-	glm::mat4 lightView = glm::lookAt(lightManager.directionalLight.position, lightManager.directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightView = glm::lookAt(lightManager._directionalLight.position, lightManager._directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 lightSpaceMatrix = orthgonalProjection * lightView;
 
-	ShaderProgram shadowProgram = ShaderProgram(readTextFromFile("./shaders/depth.vert"), readTextFromFile("./shaders/depth.frag"));
-	shadowProgram.use();
-	shadowProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+	shaderStorage.getShaderProgram("shadowProgram")->use();
+	shaderStorage.getShaderProgram("shadowProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
 
-	ShaderProgram shadowInstanceProgram = ShaderProgram(readTextFromFile("./shaders/depthInstance.vert"), readTextFromFile("./shaders/depth.frag"));
-	shadowInstanceProgram.use();
-	shadowInstanceProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+	shaderStorage.getShaderProgram("shadowInstanceProgram")->use();
+	shaderStorage.getShaderProgram("shadowInstanceProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -305,16 +301,16 @@ void WorldManager::update()
 		shadowFBO.bind(GL_FRAMEBUFFER);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_FRONT);
-		lightView = glm::lookAt(lightManager.directionalLight.position, lightManager.directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
+		lightView = glm::lookAt(lightManager._directionalLight.position, lightManager._directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
 		lightSpaceMatrix = orthgonalProjection * lightView;
 
-		shadowProgram.use();
-		shadowProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shaderStorage.getShaderProgram("shadowProgram")->use();
+		shaderStorage.getShaderProgram("shadowProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
 
-		shadowInstanceProgram.use();
-		shadowInstanceProgram.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shaderStorage.getShaderProgram("shadowInstanceProgram")->use();
+		shaderStorage.getShaderProgram("shadowInstanceProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
 		
-		objectManager.draw(lightManager.directionalLight.position, shadowProgram, shadowProgram, shadowInstanceProgram);
+		objectManager.draw(lightManager._directionalLight.position, *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowInstanceProgram"));
 		glCullFace(GL_BACK);
 		shadowFBO.unbind(GL_FRAMEBUFFER);
 		
@@ -333,42 +329,42 @@ void WorldManager::update()
 		uboProjectionView.unbind();
 
 		lightManager.drawLights(uboDirectionalLight, uboPointLights, uboSpotLights);
-		instancingShader.use();
-		instancingShader.setVec3f("_camPos", camera.position);
-		instancingShader.setFloat("material.specularStrength", 64.0f);
-		instancingShader.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
-		shadowMap.assignTextureUnit(instancingShader, "shadowMap", 3);
+		shaderStorage.getShaderProgram("instancingShader")->use();
+		shaderStorage.getShaderProgram("instancingShader")->setVec3f("camPos", camera.position);
+		shaderStorage.getShaderProgram("instancingShader")->setFloat("material.specularStrength", 64.0f);
+		shaderStorage.getShaderProgram("instancingShader")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shadowMap.assignTextureUnit(*shaderStorage.getShaderProgram("instancingShader"), "shadowMap", 3);
 		shadowMap.bind();
-		mainShader.use();
-		mainShader.setVec3f("_camPos", camera.position);
-		mainShader.setFloat("material.specularStrength", 64.0f);
-		mainShader.setMat4f("lightSpaceMatrix", lightSpaceMatrix);
-		shadowMap.assignTextureUnit(mainShader, "shadowMap", 3);
+		shaderStorage.getShaderProgram("mainShader")->use();
+		shaderStorage.getShaderProgram("mainShader")->setVec3f("camPos", camera.position);
+		shaderStorage.getShaderProgram("mainShader")->setFloat("material.specularStrength", 64.0f);
+		shaderStorage.getShaderProgram("mainShader")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shadowMap.assignTextureUnit(*shaderStorage.getShaderProgram("mainShader"), "shadowMap", 3);
 		shadowMap.bind();
-		objectManager.draw(camera.position, mainShader, opacityShader, instancingShader);
+		objectManager.draw(camera.position, *shaderStorage.getShaderProgram("mainShader"), *shaderStorage.getShaderProgram("opacityShader"), *shaderStorage.getShaderProgram("instancingShader"));
 
-		debugLightPositionShader.use();
-		for (auto& pl : lightManager.pointLights)
+		shaderStorage.getShaderProgram("debugLightPositionShader")->use();
+		for (auto& pl : lightManager._pointLights)
 		{
-			debugLightPositionShader.setVec3f("color", pl.diffuse);
-			debugLightPositionShader.setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), pl.position), glm::vec3(0.1f, 0.1f, 0.1f)));
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setVec3f("color", pl.diffuse);
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), pl.position), glm::vec3(0.1f, 0.1f, 0.1f)));
 			skyboxVAO.bind();
 			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
 		}
 
-		for (auto& sp : lightManager.spotLights)
+		for (auto& sp : lightManager._spotLights)
 		{
-			debugLightPositionShader.setVec3f("color", sp.diffuse);
-			debugLightPositionShader.setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), sp.position), glm::vec3(0.1f, 0.1f, 0.1f)));
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setVec3f("color", sp.diffuse);
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), sp.position), glm::vec3(0.1f, 0.1f, 0.1f)));
 			skyboxVAO.bind();
 			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
 		}
 
 		glDepthFunc(GL_LEQUAL);
-		skyboxShader.use();
+		shaderStorage.getShaderProgram("skyboxShader")->use();
 		view = glm::mat4(glm::mat3(camera.getViewMatrix()));
-		skyboxShader.setMat4f("view", view);
-		skyboxShader.setMat4f("projection", projection);
+		shaderStorage.getShaderProgram("skyboxShader")->setMat4f("view", view);
+		shaderStorage.getShaderProgram("skyboxShader")->setMat4f("projection", projection);
 
 		skyboxVAO.bind();
 		cubemapTexture.bind();
@@ -381,7 +377,7 @@ void WorldManager::update()
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		screenShader.use();
+		shaderStorage.getShaderProgram("screenShader")->use();
 		glDisable(GL_DEPTH_TEST);
 		screenVAO.bind();
 		postProcessingFBOTexture.bind();

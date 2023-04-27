@@ -1,9 +1,14 @@
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram() {};
+ShaderProgram::ShaderProgram() 
+{
+	this->programID = 0;
+};
 
 ShaderProgram::ShaderProgram(const std::string& vertShaderSource, const std::string& fragShaderSource)
 {
+	this->programID = 0;
+
 	GLuint vertShaderID{ glCreateShader(GL_VERTEX_SHADER) }; 
 	const GLchar* tempVertSource{ vertShaderSource.c_str() };
 	glShaderSource(vertShaderID, 1, &tempVertSource, NULL);

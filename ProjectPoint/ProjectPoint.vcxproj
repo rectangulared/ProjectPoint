@@ -179,6 +179,7 @@
     <ClCompile Include="render\entities\object\model\texture\Texture.cpp" />
     <ClCompile Include="render\entities\object\Object.cpp" />
     <ClCompile Include="render\entities\renderbuffer\Renderbuffer.cpp" />
+    <ClCompile Include="render\entities\storage\shaderStorage\ShaderStorage.cpp" />
     <ClCompile Include="render\managers\LightManager.cpp" />
     <ClCompile Include="render\managers\ObjectManager.cpp" />
     <ClCompile Include="render\managers\WorldManager.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="render\entities\object\model\Model.h" />
     <ClInclude Include="render\entities\object\renderable\Renderable.h" />
     <ClInclude Include="render\entities\renderbuffer\Renderbuffer.h" />
+    <ClInclude Include="render\entities\storage\shaderStorage\ShaderStorage.h" />
     <ClInclude Include="render\managers\LightManager.h" />
     <ClInclude Include="render\managers\ObjectManager.h" />
     <ClInclude Include="render\managers\WorldManager.h" />
