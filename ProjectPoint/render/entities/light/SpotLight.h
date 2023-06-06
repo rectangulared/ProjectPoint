@@ -3,17 +3,22 @@
 #include <glm/glm.hpp>
 
 #include "PointLight.h"
+#include <render/entities/object/model/texture/Texture.h>
 
 class SpotLight : public PointLight
 {
 public:
-	GLfloat cutOff;
-	GLfloat outerCutOff;
-	glm::vec3 direction;
+	GLfloat _cutOff;
+	GLfloat _outerCutOff;
+	glm::vec3 _direction;
+
+	Texture* _shadowMap;
 
 	SpotLight();
 
-	SpotLight(const glm::vec3& _position, const glm::vec3& _direction, const glm::vec3& _ambient, const glm::vec3& _diffuse, const glm::vec3& _specular, const GLfloat& _constant, const GLfloat& _linear, const GLfloat& _quadratic, const GLfloat& _cutOff, const GLfloat& _outerCutOff);
+	SpotLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, const GLfloat& constant, const GLfloat& linear, const GLfloat& quadratic, const GLfloat& cutOff, const GLfloat& outerCutOff);
+
+	SpotLight(const bool& isCastingShadows, const glm::vec3& position, const glm::vec3& direction, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, const GLfloat& constant, const GLfloat& linear, const GLfloat& quadratic, const GLfloat& cutOff, const GLfloat& outerCutOff, Texture* shadowMap);
 
 	void setCutOffInDegrees(const GLfloat& degrees);
 	void setOuterCutOffInDegrees(const GLfloat& degrees);

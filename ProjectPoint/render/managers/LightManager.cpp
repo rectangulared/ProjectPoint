@@ -38,15 +38,15 @@ void LightManager::drawLights(UBO& uboDirectionalLight, UBO& uboPointLights, UBO
 	uboDirectionalLight.bind();
 	uboDirectionalLight.updateSubsetData(&_isDirectionalLightActive, sizeof(GLuint), offset);
 	offset += 16;
-	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight.direction), sizeof(glm::vec3), offset);
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight._direction), sizeof(glm::vec3), offset);
 	offset += 16;
-	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight.position), sizeof(glm::vec3), offset);
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight._position), sizeof(glm::vec3), offset);
 	offset += 16;
-	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight.ambient), sizeof(glm::vec3), offset);
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight._ambient), sizeof(glm::vec3), offset);
 	offset += 16;
-	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight.diffuse), sizeof(glm::vec3), offset);
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight._diffuse), sizeof(glm::vec3), offset);
 	offset += 16;
-	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight.specular), sizeof(glm::vec3), offset);
+	uboDirectionalLight.updateSubsetData(glm::value_ptr(_directionalLight._specular), sizeof(glm::vec3), offset);
 	//offset += 16;
 	uboDirectionalLight.unbind();
 
@@ -59,19 +59,19 @@ void LightManager::drawLights(UBO& uboDirectionalLight, UBO& uboPointLights, UBO
 		offset += 16;
 		for (size_t i = 0; i < pointLightsCount; i++)
 		{
-			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i].position), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i]._position), sizeof(glm::vec3), offset);
 			offset += 12;
-			uboPointLights.updateSubsetData(&_pointLights[i].constant, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_pointLights[i]._constant, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(&_pointLights[i].linear, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_pointLights[i]._linear, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(&_pointLights[i].quadratic, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_pointLights[i]._quadratic, sizeof(GLfloat), offset);
 			offset += 12;
-			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i].ambient), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i]._ambient), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i].diffuse), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i]._diffuse), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i].specular), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_pointLights[i]._specular), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
 		}
 		uboPointLights.unbind();
@@ -86,25 +86,25 @@ void LightManager::drawLights(UBO& uboDirectionalLight, UBO& uboPointLights, UBO
 		offset += 16;
 		for (size_t i = 0; i < spotLightsCount; i++)
 		{
-			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i].direction), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i]._direction), sizeof(glm::vec3), offset);
 			offset += 12;
-			uboPointLights.updateSubsetData(&_spotLights[i].constant, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_spotLights[i]._constant, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(&_spotLights[i].linear, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_spotLights[i]._linear, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(&_spotLights[i].quadratic, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_spotLights[i]._quadratic, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(&_spotLights[i].cutOff, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_spotLights[i]._cutOff, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(&_spotLights[i].outerCutOff, sizeof(GLfloat), offset);
+			uboPointLights.updateSubsetData(&_spotLights[i]._outerCutOff, sizeof(GLfloat), offset);
 			offset += 4;
-			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i].position), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i]._position), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i].ambient), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i]._ambient), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i].diffuse), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i]._diffuse), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
-			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i].specular), sizeof(glm::vec3), offset);
+			uboPointLights.updateSubsetData(glm::value_ptr(_spotLights[i]._specular), sizeof(glm::vec3), offset);
 			offset += sizeof(glm::vec4);
 		}
 		uboSpotLights.unbind();

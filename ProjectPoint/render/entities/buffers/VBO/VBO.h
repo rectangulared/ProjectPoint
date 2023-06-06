@@ -11,6 +11,8 @@ struct Vertex
     glm::vec3 normal;
     glm::vec3 color;
     glm::vec2 textureUV;
+    glm::vec3 tangent;
+    glm::vec3 bitangent;
 
     Vertex() 
     {
@@ -18,14 +20,18 @@ struct Vertex
         normal = glm::vec3(0.0);
         color = glm::vec3(0.0);
         textureUV = glm::vec2(0.0);
+        tangent = glm::vec3(0.0);
+        bitangent = glm::vec3(0.0);
     };
 
-    Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& color, const glm::vec2& textureUV)
+    Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& color, const glm::vec2& textureUV, const glm::vec3& tangent, const glm::vec3& bitangent)
     {
         this->position = position;
         this->normal = normal;
         this->color = color;
         this->textureUV = textureUV;
+        this->tangent = tangent;
+        this->bitangent = bitangent;
     }
 };
 

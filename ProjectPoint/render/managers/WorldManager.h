@@ -16,6 +16,10 @@
 #include "render/managers/ObjectManager.h"
 #include "render/entities/object/Object.h"
 #include <render/entities/storage/shaderStorage/ShaderStorage.h>
+#include "render/entities/framebuffer/Framebuffer.h"
+#include <render/entities/object/model/texture/Cubemap.h>
+#include <render/entities/renderbuffer/Renderbuffer.h>
+#include <render/entities/buffers/UBO/UBO.h>
 
 class WorldManager
 {
@@ -39,6 +43,13 @@ protected:
 	static WorldManager* _worldManager;
 
 private:
+	bool IS_SHADOW_PASS_ACTIVE{ true };
+	bool IS_PHONG_SHADING_ACTIVE{ true };
+	bool IS_NORMAL_MAPS_ACTIVE{ true };
+	bool IS_SKYBOX_ACTIVE{ true };
+
+	float gamma{ 2.2f };
+
 	int SCREEN_WIDTH{ 1600 };
 	int SCREEN_HEIGHT{ 900 };
 

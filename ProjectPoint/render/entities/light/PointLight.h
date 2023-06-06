@@ -4,15 +4,19 @@
 #include <glm/glm.hpp>
 
 #include "Light.h"
+#include <render/entities/object/model/texture/Cubemap.h>
 
 class PointLight : public Light
 {
 public:
-	GLfloat constant = 1.0f;
-	GLfloat linear = 0.09f;
-	GLfloat quadratic = 0.032f;
-	glm::vec3 position;
+	GLfloat _constant;
+	GLfloat _linear;
+	GLfloat _quadratic;
+	glm::vec3 _position;
+
+	Cubemap* _shadowCubeMap;
 
 	PointLight();
-	PointLight(const glm::vec3& _position, const glm::vec3& _ambient, const glm::vec3& _diffuse, const glm::vec3& _specular, const GLfloat& _constant, const GLfloat& _linear, const GLfloat& _quadratic);
+	PointLight(const glm::vec3& position, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, const GLfloat& constant, const GLfloat& linear, const GLfloat& quadratic);
+	PointLight(const bool& isShadowCaster, const glm::vec3& position, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, const GLfloat& constant, const GLfloat& linear, const GLfloat& quadratic, Cubemap* shadowCubemap);
 };

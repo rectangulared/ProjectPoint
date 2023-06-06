@@ -1,5 +1,3 @@
-#define STB_IMAGE_IMPLEMENTATION
-
 #include "render/managers/WorldManager.h"
 
 int main()

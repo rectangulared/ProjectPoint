@@ -19,14 +19,16 @@
         VAO.linkAttrib(VBO, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)(1 * sizeof(glm::vec3)));
         VAO.linkAttrib(VBO, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)(2 * sizeof(glm::vec3)));
         VAO.linkAttrib(VBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)(3 * sizeof(glm::vec3)));
+        VAO.linkAttrib(VBO, 4, 3, GL_FLOAT, sizeof(Vertex), (void*)(sizeof(glm::vec2) + 3 * sizeof(glm::vec3)));
+        VAO.linkAttrib(VBO, 5, 3, GL_FLOAT, sizeof(Vertex), (void*)(sizeof(glm::vec2) + 4 * sizeof(glm::vec3)));
 
         if (_instancing != 1)
         {
             // Can't link to a mat4 so you need to link four vec4s
-            VAO.linkAttrib(instanceVBO, 4, 4, GL_FLOAT, sizeof(glm::mat4), (void*)0);
-            VAO.linkAttrib(instanceVBO, 5, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
-            VAO.linkAttrib(instanceVBO, 6, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-            VAO.linkAttrib(instanceVBO, 7, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+            VAO.linkAttrib(instanceVBO, 6, 4, GL_FLOAT, sizeof(glm::mat4), (void*)0);
+            VAO.linkAttrib(instanceVBO, 7, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
+            VAO.linkAttrib(instanceVBO, 8, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+            VAO.linkAttrib(instanceVBO, 9, 4, GL_FLOAT, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
             // Makes it so the transform is only switched when drawing the next instance
             glVertexAttribDivisor(4, 1);
             glVertexAttribDivisor(5, 1);
@@ -45,6 +47,7 @@
         GLuint diffuseNr = 1;
         GLuint specularNr = 1;
         GLuint opacityNr = 1;
+        GLuint normalNr = 1;
         for (size_t i = 0; i < _textures.size(); i++)
         {
             std::string number;
@@ -55,8 +58,10 @@
                 number = std::to_string(specularNr++);
             else if (name == "texture_opacity")
                 number = std::to_string(opacityNr++);
+            else if (name == "texture_normal")
+                number = std::to_string(normalNr++);
 
-            _textures[i].assignTextureUnit(shaderProgram, (name + number).c_str(), i);
+            _textures[i].assignTextureUnit(shaderProgram, ("material." + name + number).c_str(), i);
             _textures[i].bind();
         }
 
@@ -68,6 +73,11 @@
         else
         {
             glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLuint>(_indices.size()), GL_UNSIGNED_INT, 0, _instancing);
+        }
+
+        for (auto t : _textures)
+        {
+            t.unbind();
         }
         VAO.unbind();
     }

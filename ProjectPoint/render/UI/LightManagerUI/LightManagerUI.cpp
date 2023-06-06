@@ -18,11 +18,11 @@ void LightManagerUI::draw()
 
 	ImGui::Text("Directional Light");
 
-	ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(ptr_LightManager->_directionalLight.direction), -100.0f, 100.0f, "%.3f", 0);
-	ImGui::SliderFloat3("Directional Light Position", glm::value_ptr(ptr_LightManager->_directionalLight.position), -100.0f, 100.0f, "%.3f", 0);
-	ImGui::SliderFloat3("Directional Light Ambient", glm::value_ptr(ptr_LightManager->_directionalLight.ambient), 0.0f, 1.0f, "%.3f", 0);
-	ImGui::SliderFloat3("Directional Light Diffuse", glm::value_ptr(ptr_LightManager->_directionalLight.diffuse), 0.0f, 1.0f, "%.3f", 0);
-	ImGui::SliderFloat3("Directional Light Specular", glm::value_ptr(ptr_LightManager->_directionalLight.specular), 0.0f, 1.0f, "%.3f", 0);
+	ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(ptr_LightManager->_directionalLight._direction), -100.0f, 100.0f, "%.3f", 0);
+	ImGui::SliderFloat3("Directional Light Position", glm::value_ptr(ptr_LightManager->_directionalLight._position), -100.0f, 100.0f, "%.3f", 0);
+	ImGui::SliderFloat3("Directional Light Ambient", glm::value_ptr(ptr_LightManager->_directionalLight._ambient), 0.0f, 1.0f, "%.3f", 0);
+	ImGui::SliderFloat3("Directional Light Diffuse", glm::value_ptr(ptr_LightManager->_directionalLight._diffuse), 0.0f, 1.0f, "%.3f", 0);
+	ImGui::SliderFloat3("Directional Light Specular", glm::value_ptr(ptr_LightManager->_directionalLight._specular), 0.0f, 1.0f, "%.3f", 0);
 
 	if (ImGui::Button("Directional Light Switch"))
 		ptr_LightManager->_isDirectionalLightActive = !ptr_LightManager->_isDirectionalLightActive;
@@ -32,13 +32,13 @@ void LightManagerUI::draw()
 		int pntLightIndex = selectedPointLightIndex;
 
 		ImGui::SliderInt("Select Point Light", &selectedPointLightIndex, 0, ptr_LightManager->_pointLights.size() - 1);
-		ImGui::SliderFloat3("Point Light Position", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex].position), -100.0f, 100.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Point Light Ambient", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex].ambient), 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Point Light Diffuse", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex].diffuse), 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Point Light Specular", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex].specular), 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat("Point Light Constant", &ptr_LightManager->_pointLights[pntLightIndex].constant, 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat("Point Light Linear", &ptr_LightManager->_pointLights[pntLightIndex].linear, 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat("Point Light Quadratic", &ptr_LightManager->_pointLights[pntLightIndex].quadratic, 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Point Light Position", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex]._position), -100.0f, 100.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Point Light Ambient", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex]._ambient), 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Point Light Diffuse", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex]._diffuse), 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Point Light Specular", glm::value_ptr(ptr_LightManager->_pointLights[pntLightIndex]._specular), 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat("Point Light Constant", &ptr_LightManager->_pointLights[pntLightIndex]._constant, 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat("Point Light Linear", &ptr_LightManager->_pointLights[pntLightIndex]._linear, 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat("Point Light Quadratic", &ptr_LightManager->_pointLights[pntLightIndex]._quadratic, 0.0f, 1.0f, "%.3f", 0);
 		if (ImGui::Button("Remove current Point Light"))
 			ptr_LightManager->removePointLight(pntLightIndex);
 	}
@@ -53,14 +53,14 @@ void LightManagerUI::draw()
 		GLfloat tempSptOuterCutOff = ptr_LightManager->_spotLights[sptLightIndex].getOuterCutOffInDegrees();
 
 		ImGui::SliderInt("Select Spot Light", &selectedSpotLightIndex, 0, ptr_LightManager->_spotLights.size() - 1);
-		ImGui::SliderFloat3("Spot Light Position", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex].position), -100.0f, 100.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Spot Light Direction", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex].direction), -100.0f, 100.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Spot Light Ambient", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex].ambient), 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Spot Light Diffuse", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex].diffuse), 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat3("Spot Light Specular", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex].specular), 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat("Spot Light Constant", &ptr_LightManager->_spotLights[sptLightIndex].constant, 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat("Spot Light Linear", &ptr_LightManager->_spotLights[sptLightIndex].linear, 0.0f, 1.0f, "%.3f", 0);
-		ImGui::SliderFloat("Spot Light Quadratic", &ptr_LightManager->_spotLights[sptLightIndex].quadratic, 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Spot Light Position", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex]._position), -100.0f, 100.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Spot Light Direction", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex]._direction), -100.0f, 100.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Spot Light Ambient", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex]._ambient), 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Spot Light Diffuse", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex]._diffuse), 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat3("Spot Light Specular", glm::value_ptr(ptr_LightManager->_spotLights[sptLightIndex]._specular), 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat("Spot Light Constant", &ptr_LightManager->_spotLights[sptLightIndex]._constant, 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat("Spot Light Linear", &ptr_LightManager->_spotLights[sptLightIndex]._linear, 0.0f, 1.0f, "%.3f", 0);
+		ImGui::SliderFloat("Spot Light Quadratic", &ptr_LightManager->_spotLights[sptLightIndex]._quadratic, 0.0f, 1.0f, "%.3f", 0);
 		ImGui::SliderFloat("Spot Light Cut Off", &tempSptCutOff, 0.0f, 180.0f, "%.3f", 0);
 		ImGui::SliderFloat("Spot Light Outer Cut Off", &tempSptOuterCutOff, 0.0f, 180.0f, "%.3f", 0);
 
@@ -71,6 +71,6 @@ void LightManagerUI::draw()
 			ptr_LightManager->removeSpotLight(sptLightIndex);
 	}
 	if (ImGui::Button("Add Spot Light"))
-		ptr_LightManager->addSpotLight(SpotLight());
+		ptr_LightManager->addSpotLight(SpotLight(true, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f, glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(17.5f)), new Texture(1024, 1024, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT)));
 	ImGui::End();
 }

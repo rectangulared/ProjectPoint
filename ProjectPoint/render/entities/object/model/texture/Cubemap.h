@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "glad/glad.h"
-#include "stb_image.h"
 
 class Cubemap
 {

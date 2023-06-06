@@ -1,15 +1,6 @@
 #include "WorldManager.h"
 
 #include "utils/FileReadUtils.hpp"
-#include "render/entities/framebuffer/Framebuffer.h"
-#include <render/entities/object/model/texture/Cubemap.h>
-#include <render/entities/renderbuffer/Renderbuffer.h>
-#include <render/entities/buffers/UBO/UBO.h>
-
-float randf()
-{
-	return -1.0f + (rand() / (RAND_MAX / 2.0f));
-}
 
 WorldManager* WorldManager::_worldManager = nullptr;
 
@@ -45,18 +36,14 @@ void WorldManager::init()
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(0);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
 	ImGui::StyleColorsDark();
-
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 460");
 
@@ -77,123 +64,77 @@ void WorldManager::init()
 	shaderStorage.addShaderProgram("shadowProgram", ShaderProgram(readTextFromFile("./shaders/depth.vert"), readTextFromFile("./shaders/depth.frag")));
 	shaderStorage.addShaderProgram("shadowInstanceProgram", ShaderProgram(readTextFromFile("./shaders/depthInstance.vert"), readTextFromFile("./shaders/depth.frag")));
 
-	std::vector <glm::mat4> instanceMatrix;
-
-	for (unsigned int i = 0; i < 10000; i++)
-	{
-		float x = randf();
-		float finalRadius = randf() * 25;
-		float y = ((rand() % 2) * 2 - 1) * sqrt(1.0f - x * x);
-
-		glm::vec3 tempTranslation;
-
-		if (randf() > 0.5f)
-		{
-			tempTranslation = glm::vec3(y * finalRadius, randf(), x * finalRadius);
-		}
-		else
-		{
-			tempTranslation = glm::vec3(x * finalRadius, randf(), y * finalRadius);
-		}
-
-		glm::mat4 trans = glm::mat4(1.0f);
-
-		trans = glm::translate(trans, tempTranslation);
-
-		instanceMatrix.push_back(trans);
-	}
-
-	cubeModel = Model("./models/Cube/cube.obj");
-
 	lightManager = LightManager();
 	lightManagerUi.setup(&lightManager);
-	camera = Camera(glm::vec3(0.0f, 2.0f, 0.0f));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager.addObject(new Object(cubeModel, glm::mat4(1.0f)));
-	objectManager._objects[6]->translate(glm::vec3(0.0f, 0.0f, 0.0f));
-	objectManager._objects[6]->scale(glm::vec3(10.0f, 1.0f, 10.0f));
-	for (int i = 0; i < 5; i++)
-	{
-		objectManager._objects[i]->translate(glm::vec3(0.0f, i, -i + 5));
-	}
+	camera = Camera(glm::vec3(-2.0f, 0.0f, 0.0f));
 }
 
 void WorldManager::update()
 {
-	std::vector<Vertex> screenVertices = {
-		Vertex(glm::vec3(-1.0f,  1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f))
+	std::vector<Vertex> screenVertices 
+	{
+		Vertex(glm::vec3(-1.0f,  1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(0.0f))
 	};
 
 	VAO screenVAO;
 	VBO screenVBO(screenVertices, GL_STATIC_DRAW);
-
 	screenVAO.bind();
 	screenVBO.bind();
-
 	screenVAO.linkAttrib(screenVBO, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)0);
 	screenVAO.linkAttrib(screenVBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, textureUV));
-
 	screenVAO.unbind();
 	screenVBO.unbind();
 
 	std::vector<Vertex> skyboxVertices = {
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f)),
-		Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f))
+		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)),
+		Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec2(0.0f), glm::vec3(0.0f), glm::vec3(0.0f))
 	};
 
 	VAO skyboxVAO;
 	VBO skyboxVBO(skyboxVertices, GL_STATIC_DRAW);
-
 	skyboxVAO.bind();
 	skyboxVBO.bind();
-
 	skyboxVAO.linkAttrib(skyboxVBO, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)0);
 	skyboxVAO.linkAttrib(skyboxVBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, textureUV));
-
 	skyboxVAO.unbind();
 	skyboxVBO.unbind();
 
@@ -206,32 +147,26 @@ void WorldManager::update()
 		"models/skybox/front.jpg",
 		"models/skybox/back.jpg"
 	};
-
 	Cubemap cubemapTexture = Cubemap(faces);
+
+	stbi_set_flip_vertically_on_load(true);
+	Model helmet = Model("./models/glTF/FlightHelmet.gltf");
+	objectManager.addObject(new Object(helmet, glm::mat4(1.0f)));
+	objectManager._objects[0]->scale(glm::vec3(5.0f, 5.0f, 5.0f));
 
 	Framebuffer fbo;
 	fbo.bind(GL_FRAMEBUFFER);
-
-	Texture framebufferTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, 4, GL_TRUE);
+	Texture framebufferTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA16F, 4, GL_TRUE);
 	framebufferTexture.attachToCurrentFramebuffer(GL_COLOR_ATTACHMENT0);
-
 	Renderbuffer rbo = Renderbuffer(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, SCREEN_WIDTH, SCREEN_HEIGHT, 4);
 	rbo.bind();
-
 	fbo.unbind(GL_FRAMEBUFFER);
 
 	Framebuffer postProcessingFBO;
-
 	postProcessingFBO.bind(GL_FRAMEBUFFER);
-	Texture postProcessingFBOTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_SRGB);
+	Texture postProcessingFBOTexture = Texture(SCREEN_WIDTH, SCREEN_HEIGHT, GL_SRGB, GL_RGB);
 	postProcessingFBOTexture.attachToCurrentFramebuffer(GL_COLOR_ATTACHMENT0);
 	postProcessingFBO.unbind(GL_FRAMEBUFFER);
-
-	stbi_set_flip_vertically_on_load(true);
-	Model sponza = Model("./models/Sponza/sponza.obj");
-	stbi_set_flip_vertically_on_load(false);
-	objectManager.addObject(new Object(sponza, glm::mat4(1.0f)));
-	objectManager._objects[7]->scale(glm::vec3(0.05f, 0.05f, 0.05f));
 
 	UBO uboProjectionView = UBO(2 * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
 	uboProjectionView.assignBindingPoint(1, shaderStorage.getShaderProgram("mainShader")->getProgramID(), "Matrices");
@@ -260,7 +195,7 @@ void WorldManager::update()
 	uboProjectionView.unbind();
 
 	Framebuffer shadowFBO = Framebuffer(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-	Texture shadowMap = Texture(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, GL_DEPTH_COMPONENT);
+	Texture shadowMap = Texture(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
 	shadowFBO.bind(GL_FRAMEBUFFER);
 	shadowMap.bind();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -274,34 +209,28 @@ void WorldManager::update()
 	glReadBuffer(GL_NONE);
 	shadowFBO.unbind(GL_FRAMEBUFFER);
 
-	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
-	glm::mat4 lightView = glm::lookAt(lightManager._directionalLight.position, lightManager._directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 lightSpaceMatrix = orthgonalProjection * lightView;
-
-	shaderStorage.getShaderProgram("shadowProgram")->use();
-	shaderStorage.getShaderProgram("shadowProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
-
-	shaderStorage.getShaderProgram("shadowInstanceProgram")->use();
-	shaderStorage.getShaderProgram("shadowInstanceProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+	glm::mat4 orthgonalProjection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, 1.0f, 7.0f);
+	glm::mat4 lightView;
+	glm::mat4 lightSpaceMatrix;
 
 	while (!glfwWindowShouldClose(window))
 	{
-		//TODO: Make separate render manager
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		processInput();
 
-		// Depth testing needed for Shadow Map
+
+		//SHADOW PASS START
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		glEnable(GL_DEPTH_TEST);
 
-		// Preparations for the Shadow Map
 		glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 		shadowFBO.bind(GL_FRAMEBUFFER);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glCullFace(GL_FRONT);
-		lightView = glm::lookAt(lightManager._directionalLight.position, lightManager._directionalLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		lightView = glm::lookAt(lightManager._directionalLight._position, lightManager._directionalLight._direction, glm::vec3(0.0f, 1.0f, 0.0f));
 		lightSpaceMatrix = orthgonalProjection * lightView;
 
 		shaderStorage.getShaderProgram("shadowProgram")->use();
@@ -310,14 +239,17 @@ void WorldManager::update()
 		shaderStorage.getShaderProgram("shadowInstanceProgram")->use();
 		shaderStorage.getShaderProgram("shadowInstanceProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
 		
-		objectManager.draw(lightManager._directionalLight.position, *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowInstanceProgram"));
-		glCullFace(GL_BACK);
+		objectManager.draw(lightManager._directionalLight._position, *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowInstanceProgram"));
+
 		shadowFBO.unbind(GL_FRAMEBUFFER);
 		
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//SHADOW PASS END
 
+		//COLOUR PASS WITH MSAA 
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		fbo.bind(GL_FRAMEBUFFER);
-		glEnable(GL_DEPTH_TEST);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -336,9 +268,14 @@ void WorldManager::update()
 		shadowMap.assignTextureUnit(*shaderStorage.getShaderProgram("instancingShader"), "shadowMap", 3);
 		shadowMap.bind();
 		shaderStorage.getShaderProgram("mainShader")->use();
+		shaderStorage.getShaderProgram("mainShader")->setVec3f("dirLightPos", lightManager._directionalLight._position);
 		shaderStorage.getShaderProgram("mainShader")->setVec3f("camPos", camera.position);
 		shaderStorage.getShaderProgram("mainShader")->setFloat("material.specularStrength", 64.0f);
 		shaderStorage.getShaderProgram("mainShader")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
+		shaderStorage.getShaderProgram("mainShader")->setBool("IS_SHADOW_PASS_ACTIVE", IS_SHADOW_PASS_ACTIVE);
+		shaderStorage.getShaderProgram("mainShader")->setBool("IS_PHONG_SHADING_ACTIVE", IS_PHONG_SHADING_ACTIVE);
+		shaderStorage.getShaderProgram("mainShader")->setBool("IS_NORMAL_MAPS_ACTIVE", IS_NORMAL_MAPS_ACTIVE);
+		shaderStorage.getShaderProgram("mainShader")->setFloat("gamma", gamma);
 		shadowMap.assignTextureUnit(*shaderStorage.getShaderProgram("mainShader"), "shadowMap", 3);
 		shadowMap.bind();
 		objectManager.draw(camera.position, *shaderStorage.getShaderProgram("mainShader"), *shaderStorage.getShaderProgram("opacityShader"), *shaderStorage.getShaderProgram("instancingShader"));
@@ -346,30 +283,35 @@ void WorldManager::update()
 		shaderStorage.getShaderProgram("debugLightPositionShader")->use();
 		for (auto& pl : lightManager._pointLights)
 		{
-			shaderStorage.getShaderProgram("debugLightPositionShader")->setVec3f("color", pl.diffuse);
-			shaderStorage.getShaderProgram("debugLightPositionShader")->setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), pl.position), glm::vec3(0.1f, 0.1f, 0.1f)));
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setVec3f("color", pl._diffuse);
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), pl._position), glm::vec3(0.1f, 0.1f, 0.1f)));
 			skyboxVAO.bind();
 			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
 		}
 
 		for (auto& sp : lightManager._spotLights)
 		{
-			shaderStorage.getShaderProgram("debugLightPositionShader")->setVec3f("color", sp.diffuse);
-			shaderStorage.getShaderProgram("debugLightPositionShader")->setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), sp.position), glm::vec3(0.1f, 0.1f, 0.1f)));
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setVec3f("color", sp._diffuse);
+			shaderStorage.getShaderProgram("debugLightPositionShader")->setMat4f("model", glm::scale(glm::translate(glm::mat4(1.0f), sp._position), glm::vec3(0.1f, 0.1f, 0.1f)));
 			skyboxVAO.bind();
 			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
 		}
 
-		glDepthFunc(GL_LEQUAL);
-		shaderStorage.getShaderProgram("skyboxShader")->use();
-		view = glm::mat4(glm::mat3(camera.getViewMatrix()));
-		shaderStorage.getShaderProgram("skyboxShader")->setMat4f("view", view);
-		shaderStorage.getShaderProgram("skyboxShader")->setMat4f("projection", projection);
+		if (IS_SKYBOX_ACTIVE)
+		{
 
-		skyboxVAO.bind();
-		cubemapTexture.bind();
-		glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
-		glDepthFunc(GL_LESS);
+			glDepthFunc(GL_LEQUAL);
+			shaderStorage.getShaderProgram("skyboxShader")->use();
+			view = glm::mat4(glm::mat3(camera.getViewMatrix()));
+			shaderStorage.getShaderProgram("skyboxShader")->setMat4f("view", view);
+			shaderStorage.getShaderProgram("skyboxShader")->setMat4f("projection", projection);
+
+			cubemapTexture.bind();
+			skyboxVAO.bind();
+			glDrawArrays(GL_TRIANGLES, 0, skyboxVertices.size());
+			glDepthFunc(GL_LESS);
+
+		}
 
 		fbo.bind(GL_READ_FRAMEBUFFER);
 		postProcessingFBO.bind(GL_DRAW_FRAMEBUFFER);
@@ -377,12 +319,20 @@ void WorldManager::update()
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//COROUR PASS WITH MSAA END
+
+
+		//COLOUR TEXTURE TO PLANE TRANSFER PASS START
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		shaderStorage.getShaderProgram("screenShader")->use();
 		glDisable(GL_DEPTH_TEST);
 		screenVAO.bind();
 		postProcessingFBOTexture.bind();
 		glDrawArrays(GL_TRIANGLES, 0, screenVertices.size());
 		screenVAO.unbind();
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//COLOUR TEXTURE TO PLANE TRANSFER PASS END
 
 		if (isMenuOpen)
 		{
@@ -390,7 +340,20 @@ void WorldManager::update()
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			lightManagerUi.draw();
+			ImGui::Begin("Render Manager");
+			ImGui::Text("Shadow Map");
 			ImGui::Image((void*)(intptr_t)shadowMap._id, ImVec2(320, 240));
+
+			ImGui::Checkbox("Shadows", &IS_SHADOW_PASS_ACTIVE);
+			ImGui::Checkbox("Blinn-Phong lighting", &IS_PHONG_SHADING_ACTIVE);
+			ImGui::Checkbox("Normal maps", &IS_NORMAL_MAPS_ACTIVE);
+			ImGui::Checkbox("Skybox", &IS_SKYBOX_ACTIVE);
+			if (&IS_PHONG_SHADING_ACTIVE)
+			{
+				ImGui::SliderFloat("Gamma", &gamma, 0.0f, 10.0f);
+			}
+
+			ImGui::End();
 			ImGui::Render();
 			int display_w, display_h;
 			glfwGetFramebufferSize(window, &display_w, &display_h);

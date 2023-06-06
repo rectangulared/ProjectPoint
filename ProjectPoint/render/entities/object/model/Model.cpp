@@ -89,6 +89,24 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         else
             vertex.textureUV = glm::vec2(0.0f);
 
+        if (mesh->HasTangentsAndBitangents())
+        {
+            vector.x = mesh->mTangents[i].x;
+            vector.y = mesh->mTangents[i].y;
+            vector.z = mesh->mTangents[i].z;
+            vertex.tangent = vector;
+
+            vector.x = mesh->mBitangents[i].x;
+            vector.y = mesh->mBitangents[i].y;
+            vector.z = mesh->mBitangents[i].z;
+            vertex.bitangent = vector;
+        }
+        else
+        {
+            vertex.tangent = glm::vec3(0.0f);
+            vertex.bitangent = glm::vec3(0.0f);
+        }
+
         vertices.push_back(vertex);
     }
 
@@ -108,7 +126,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
     if (opaque)
@@ -141,7 +159,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         if (!skip)
         {
             std::string fullPath = directory + "/" + str.C_Str();
-            texture = new Texture(fullPath.c_str(), typeName.c_str());
+            texture = new Texture(fullPath.c_str(), typeName.c_str(), true);
             texture->path = str.C_Str();
             textures.push_back(*texture);
             loadedTextures.push_back(*texture);

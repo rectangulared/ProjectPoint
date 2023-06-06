@@ -12,6 +12,9 @@ in VS_OUT
 	vec3 fragPos;
 	vec3 camPos;
 	vec4 fragPosLightSpace;
+	vec3 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
 } fs_in;
 
 struct DirLight
@@ -70,48 +73,70 @@ struct Material
 {
 	float specularStrength;
 	sampler2D texture_diffuse1;
-	sampler2D texture_specular1;  
+	sampler2D texture_specular1;
+	sampler2D texture_normal1;  
 };
 
 uniform Material material;
-uniform samplerCube cubeMap;
 uniform sampler2D shadowMap;
 
-vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture);
-vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture);  
-vec4 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture);
+uniform bool IS_SHADOW_PASS_ACTIVE;
+uniform bool IS_PHONG_SHADING_ACTIVE;
+uniform bool IS_NORMAL_MAPS_ACTIVE;
+
+uniform float gamma;
+
+vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir);  
+vec4 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir);
 float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir);
 
 void main()
 {
-	vec3 norm = normalize(fs_in.normal);
-	vec3 viewDir = normalize(fs_in.camPos - fs_in.fragPos);
-	vec4 result = vec4(0.0);
-
-	vec3 I = normalize(fs_in.fragPos - fs_in.camPos);
-	vec3 R = reflect(I, norm);
-	vec4 cubemapTexture = texture(cubeMap, R);
-	if(isDirLight)
+	if(IS_PHONG_SHADING_ACTIVE)
 	{
-		result = calcDirLight(dirLight, norm, viewDir, cubemapTexture);
-	}
+		vec3 norm;
+		if(IS_NORMAL_MAPS_ACTIVE)
+		{
+			norm= texture(material.texture_normal1, fs_in.texCoords).rgb;
+			norm = normalize(norm * 2.0 - 1.0);
+		}
+		else
+		{
+			norm = normalize(fs_in.normal);
+		}
+		vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.fragPos);
+		vec4 result;
 
-	for(int i = 0; i < activePointLights; i++)
+		vec3 I = normalize(fs_in.fragPos - fs_in.camPos);
+		vec3 R = reflect(I, norm);
+		if(isDirLight)
+		{
+			result = calcDirLight(dirLight, norm, viewDir);
+		}
+
+		for(int i = 0; i < activePointLights; i++)
+		{
+			result += calcPointLight(pointLights[i], norm, viewDir);
+		}
+
+		for(int i = 0; i < activeSpotLights; i++) 
+		{
+			result += calcSpotLight(spotLights[i], norm, viewDir);
+		}
+
+		vec3 mapped = vec3(1.0) - exp(-result.rgb * 1.0);
+		mapped = pow(mapped, vec3(1.0 / gamma));
+		fragColor = vec4(mapped, 1.0);
+	} else
 	{
-		result += calcPointLight(pointLights[i], norm, viewDir, cubemapTexture);
+		fragColor = texture(material.texture_diffuse1, fs_in.texCoords);
 	}
-
-	for(int i = 0; i < activeSpotLights; i++) 
-	{
-		result += calcSpotLight(spotLights[i], norm, viewDir, cubemapTexture);
-	}
-
-	fragColor = result;
 }
 
-vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture)
+vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
-	vec3 lightDir = normalize(light.position - fs_in.fragPos);
+	vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
 
 	vec4 ambient = vec4(light.ambient, 1.0) * texture(material.texture_diffuse1, fs_in.texCoords);
 	if(ambient.a < 0.01)
@@ -130,14 +155,22 @@ vec4 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture
 		specular = vec4(light.specular, 1.0) * spec * texture(material.texture_specular1, fs_in.texCoords);
 	}
 
-	float shadow = shadowCalculation(fs_in.fragPosLightSpace, lightDir);
-	vec3 color = texture(material.texture_diffuse1, fs_in.texCoords).rgb;
-    vec3 lighting = (ambient.rgb + (1.0 - shadow) * (diffuse.rgb + specular.rgb)) * color;
+	vec3 lighting;
 
+	if(IS_SHADOW_PASS_ACTIVE)
+	{
+		float shadow = shadowCalculation(fs_in.fragPosLightSpace, lightDir);
+		vec3 color = texture(material.texture_diffuse1, fs_in.texCoords).rgb;
+		lighting = (ambient.rgb + (1.0 - shadow) * (diffuse.rgb + specular.rgb)) * color;
+	}
+	else
+	{
+		lighting = ambient.rgb * diffuse.rgb * specular.rgb;
+	}
 	return vec4(lighting, 1.0);
 } 
 
-vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture)
+vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir)
 {
 	vec4 ambient = vec4(light.ambient, 1.0) * texture(material.texture_diffuse1, fs_in.texCoords);
 
@@ -168,7 +201,7 @@ vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec4 cubemapTex
 	return (ambient + diffuse + specular);
 }
 
-vec4 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, vec4 cubemapTexture)
+vec4 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir)
 {   
 	vec4 ambient = vec4(light.ambient, 1.0) * texture(material.texture_diffuse1, fs_in.texCoords);
 

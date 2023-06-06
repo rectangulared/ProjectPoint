@@ -15,9 +15,9 @@ public:
 	std::string type;
 	std::string path;
 
-	Texture(const GLuint& width, const GLuint& height, const GLenum& format);
+	Texture(const GLuint& width, const GLuint& height, const GLenum& internalFormat, const GLenum& format);
 
-	Texture(const char* data, const char* textureType);
+	Texture(const char* data, const char* textureType, const bool& isGammaCorrected);
 
 	Texture(const GLuint& width, const GLuint& height, const GLenum& format, const GLuint& samples, const GLboolean& fixedSampleLocations);
 

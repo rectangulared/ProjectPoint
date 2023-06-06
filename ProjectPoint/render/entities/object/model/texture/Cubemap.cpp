@@ -1,5 +1,10 @@
 #include "Cubemap.h"
 
+#ifndef STBI_INCLUDE_STB_IMAGE_H
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#endif
+
 Cubemap::Cubemap(const std::vector<std::string>& faces)
 {
 	glGenTextures(1, &_id);
@@ -24,6 +29,7 @@ Cubemap::Cubemap(const std::vector<std::string>& faces)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 }
 
 
