@@ -150,9 +150,9 @@ void WorldManager::update()
 	Cubemap cubemapTexture = Cubemap(faces);
 
 	stbi_set_flip_vertically_on_load(true);
-	Model helmet = Model("./models/glTF/FlightHelmet.gltf");
+	Model helmet = Model("./models/glTF/Sponza.gltf");
 	objectManager.addObject(new Object(helmet, glm::mat4(1.0f)));
-	objectManager._objects[0]->scale(glm::vec3(5.0f, 5.0f, 5.0f));
+	objectManager._objects[0]->scale(glm::vec3(0.01f, 0.01f, 0.01f));
 
 	Framebuffer fbo;
 	fbo.bind(GL_FRAMEBUFFER);
@@ -238,9 +238,9 @@ void WorldManager::update()
 
 		shaderStorage.getShaderProgram("shadowInstanceProgram")->use();
 		shaderStorage.getShaderProgram("shadowInstanceProgram")->setMat4f("lightSpaceMatrix", lightSpaceMatrix);
-		
+		glCullFace(GL_FRONT);
 		objectManager.draw(lightManager._directionalLight._position, *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowProgram"), *shaderStorage.getShaderProgram("shadowInstanceProgram"));
-
+		glCullFace(GL_BACK);
 		shadowFBO.unbind(GL_FRAMEBUFFER);
 		
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);

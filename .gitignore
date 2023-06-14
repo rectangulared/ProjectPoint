@@ -364,5 +364,4 @@ FodyWeavers.xsd
 ProjectPoint/models/*
 ProjectPoint/imgui.ini
 
-*.vcxproj
 *.filters
